@@ -55,6 +55,28 @@ class OrderController:
 
         self.view.show_order_list(orders)
 
+    def approve(self, order_id: str) -> None:
+        order = self.order_repository.read_one(order_id)
+
+        if order is None:
+            self.view.show_message(f"존재하지 않는 주문입니다: {order_id}")
+            return
+
+        if order.status != OrderStatus.RESERVED:
+            self.view.show_message(f"승인할 수 없는 상태입니다: {order_id}")
+            return
+
+        sample = self.sample_repository.read_one(order.sample_id)
+        if order.quantity <= sample.stock_quantity:
+            order.status = OrderStatus.CONFIRMED
+        else:
+            order.status = OrderStatus.PRODUCING
+
+        self.order_repository.update(order)
+        self.view.show_message(
+            f"주문이 승인되어 {order.status.name} 상태로 전환되었습니다: {order_id}"
+        )
+
     def run_submenu(self) -> None:
         while True:
             self.view.show_order_menu()
