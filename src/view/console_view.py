@@ -30,17 +30,16 @@ class ConsoleView:
 
     def show_sample_list(self, samples: list, page: int, total_pages: int) -> None:
         for sample in samples:
-            print(
-                f"{sample.sample_id} | {sample.name} | "
-                f"평균 생산시간: {sample.avg_production_time} | 수율: {sample.yield_rate} | "
-                f"재고: {sample.stock_quantity}"
-            )
+            self._print_sample_line(sample)
         print(f"{page}/{total_pages} 페이지")
 
     def show_search_results(self, results: list) -> None:
         for sample in results:
-            print(
-                f"{sample.sample_id} | {sample.name} | "
-                f"평균 생산시간: {sample.avg_production_time} | 수율: {sample.yield_rate} | "
-                f"재고: {sample.stock_quantity}"
-            )
+            self._print_sample_line(sample)
+
+    def _print_sample_line(self, sample) -> None:
+        print(
+            f"{sample.sample_id} | {sample.name} | "
+            f"평균 생산시간: {sample.avg_production_time} | 수율: {sample.yield_rate} | "
+            f"재고: {sample.stock_quantity}"
+        )
