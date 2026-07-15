@@ -283,19 +283,25 @@ tests/
 
 **버그 수정 이력**
 
-- **이중 할당(double booking) 버그**: 주문 승인(`OrderController.approve()`) 시점에는
-  재고를 차감하지 않고 항상 "현재" `stock_quantity`와 주문 수량을 비교했기 때문에, 같은
-  시료에 대해 순차로 승인되는 여러 주문이 재고를 중복으로 확보(둘 다 "재고 충분"으로
+- **이중 할당(double booking) 버그 최초 발견**: 주문 승인(`OrderController.approve()`)
+  시점에는 재고를 차감하지 않고 항상 "현재" `stock_quantity`와 주문 수량을 비교했기 때문에,
+  같은 시료에 대해 순차로 승인되는 여러 주문이 재고를 중복으로 확보(둘 다 "재고 충분"으로
   오판정되어 CONFIRMED)할 수 있는 버그가 있었다.
-  - **수정 규칙**: 주문이 `CONFIRMED` 상태로 전환되는 시점에 항상 `order.quantity`만큼
-    재고를 차감한다. 즉시 승인(재고 충분)되는 경우와 생산 완료 후 `PRODUCING`→`CONFIRMED`로
-    전환되는 경우 모두 동일하게 적용한다.
-  - **수정 위치**: `OrderController.approve()`의 즉시 CONFIRMED 분기(`sample.stock_quantity
-    -= order.quantity`), `ProductionController._complete_job()`(생산된 실생산량을 더하고
-    주문 수량만큼 뺀 순증감을 반영: `sample.stock_quantity += job.quantity - order.quantity`).
-  - **검증**: 재고 100인 시료에 대해 50짜리 주문(CONFIRMED, 재고 100→50) 승인 후 80짜리
-    주문을 승인하면 남은 재고(50) < 80이므로 이제는 정확히 `PRODUCING`으로 분기됨을 통합
-    테스트로 확인(`tests/controller/test_order_controller.py`).
+  - **1차 수정(이후 재변경됨)**: 주문이 `CONFIRMED` 상태로 전환되는 시점(승인 즉시 또는
+    생산 완료 후)에 항상 `order.quantity`만큼 재고를 차감하도록 구현했었다.
+  - **사용자 피드백으로 최종 변경**: 출고 처리가 실제로 하는 일이 있어야 한다는 논리로,
+    **재고 차감 시점을 `CONFIRMED` 전환이 아니라 `CONFIRMED` → `RELEASE`(출고) 전환
+    시점으로 최종 변경**했다.
+  - **최종 규칙**: 승인(`OrderController.approve()`)은 상태(`CONFIRMED`/`PRODUCING`)만
+    전환하고 재고는 건드리지 않는다. 생산 완료(`ProductionController._complete_job()`)는
+    실생산량 전량을 재고에 더하기만 한다(주문 수량 차감 없음). 출고
+    (`ShipmentController.ship()`)에서 `CONFIRMED` → `RELEASE`로 전환하며
+    `sample.stock_quantity -= order.quantity`로 재고를 차감한다.
+  - **알려진 트레이드오프**: 이 변경으로 이중 할당 가능성이 다시 열려 있다. 승인 시점에는
+    재고가 줄지 않으므로, 같은 시료에 대해 재고보다 많은 합계의 여러 주문이 동시에
+    "재고 충분"으로 판정되어 모두 `CONFIRMED`될 수 있다(예: 재고 100인데 50짜리 + 80짜리
+    주문이 둘 다 승인 가능). 사용자가 이 트레이드오프를 인지하고 받아들이기로 했으며,
+    별도의 방지 로직은 이번 범위에 포함하지 않는다.
 
 ---
 
