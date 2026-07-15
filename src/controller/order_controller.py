@@ -1,7 +1,11 @@
 import math
 from datetime import date, datetime
 
-from src.controller.menu_dispatch import INVALID_INPUT_MESSAGE, run_menu_loop
+from src.controller.menu_dispatch import (
+    INVALID_INPUT_MESSAGE,
+    run_menu_loop,
+    select_order_by_number,
+)
 from src.domain.models import Order, OrderStatus, ProductionJob
 
 
@@ -145,17 +149,11 @@ class OrderController:
                 self.view.show_message(INVALID_INPUT_MESSAGE)
 
     def _select_order_and_process(self, orders: list, choice: str) -> None:
-        if not orders:
-            self.view.show_message("선택할 주문이 없습니다.")
+        order = select_order_by_number(self.view, orders)
+        if order is None:
             return
 
-        number = self.view.get_order_selection_number()
-        if number < 1 or number > len(orders):
-            self.view.show_message("잘못된 번호입니다.")
-            return
-
-        order_id = orders[number - 1].order_id
         if choice == "1":
-            self.approve(order_id)
+            self.approve(order.order_id)
         else:
-            self.reject(order_id)
+            self.reject(order.order_id)
