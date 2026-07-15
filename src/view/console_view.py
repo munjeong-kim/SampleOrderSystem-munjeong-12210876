@@ -131,3 +131,23 @@ class ConsoleView:
 
     def get_production_menu_choice(self) -> str:
         return input("메뉴를 선택하세요: ")
+
+    def show_order_status_summary(self, counts: dict) -> None:
+        for status, count in counts.items():
+            print(f"{status}: {count}건")
+
+    def show_stock_status(self, rows: list) -> None:
+        for sample, required, status in rows:
+            print(
+                f"{sample.sample_id} | {sample.name} | 재고: {sample.stock_quantity} | "
+                f"필요 수량: {required} | 상태: {status}"
+            )
+
+    def show_monitoring_menu(self) -> None:
+        print("=== 모니터링 ===")
+        print("1. 주문량 확인")
+        print("2. 재고량 확인")
+        print("0. 뒤로가기")
+
+    def get_monitoring_menu_choice(self) -> str:
+        return input("메뉴를 선택하세요: ")
