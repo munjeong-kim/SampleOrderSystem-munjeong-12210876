@@ -262,6 +262,25 @@ tests/
 - 상태 전이 다이어그램(PRD 6장) 기준 End-to-End 시나리오 수동 점검
   (RESERVED → 승인/거절 → (PRODUCING →) CONFIRMED → RELEASE)
 
+**최종 클린코드 점검 결과**
+
+전체 소스를 다시 훑어본 결과 대부분의 중복은 이미 이전 Phase들에서 정리됨
+(`menu_dispatch.py`의 `run_menu_loop`/`select_order_by_number`/`INVALID_INPUT_MESSAGE`,
+`OrderController._get_reserved_order` 등). 마지막으로 발견한 후보 하나를 검토 후
+현행 유지로 결정했다.
+
+- **후보**: `SampleRepository.update()`, `OrderRepository.update()`,
+  `ProductionQueueRepository.update()`가 "id 필드로 찾아 dict 교체 → 없으면 ValueError →
+  저장" 로직을 거의 동일하게 반복(id 필드명·에러 메시지만 다름). `create`/`read_all`/
+  `read_one`도 Sample/Order repository 간 유사한 패턴.
+- **트레이드오프**: 제네릭 헬퍼(`update_by_id` 등)나 베이스 클래스로 추출하면 중복은
+  줄어들지만, 서로 다른 도메인(Sample/Order/ProductionJob)을 다루는 3개 repository 사이에
+  약한 추상화 결합이 생긴다. 교육용 콘솔 앱 규모(repository 3개, 각각 몇 줄 안 되는 중복)에서는
+  각 repository가 독립적이고 명시적인 편이 가독성 면에서 더 낫다고 판단.
+- **결정**: 현행 유지(리팩터링하지 않음). 참고로 `ConsoleView`의 `get_*_menu_choice()` 6개가
+  전부 `return input("메뉴를 선택하세요: ")`로 동일한 것도 검토했으나, 서로 다른 화면의 입력을
+  의미상 구분해주는 이름이라 통합하지 않기로 함.
+
 ---
 
 ## 진행 방식 메모
