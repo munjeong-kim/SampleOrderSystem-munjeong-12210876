@@ -160,9 +160,9 @@ tests/
 
 **세부 진행 항목**
 
-1. 🔧 생산 큐 도메인 모델 및 저장소 — `ProductionJob`(순수 데이터클래스)과
+1. ✅ 생산 큐 도메인 모델 및 저장소 — `ProductionJob`(순수 데이터클래스)과
    `ProductionQueueRepository`(CRUD) 신규 구현
-2. ☐ 주문 승인 시 생산 큐 등록 연동 — `OrderController.approve()`에서 PRODUCING 분기 시
+2. 🔧 주문 승인 시 생산 큐 등록 연동 — `OrderController.approve()`에서 PRODUCING 분기 시
    생산량 계산(부족분/실생산량/총생산시간) 후 `ProductionJob`을 큐에 등록. 큐가 비어있었으면
    즉시 시작(`started_at` 기록), 아니면 대기(`started_at=None`)
 3. ☐ 생산 라인 진행 확인 로직 — 큐의 선두 작업이 완료 시간을 지났으면 재고 반영 + 주문 상태
