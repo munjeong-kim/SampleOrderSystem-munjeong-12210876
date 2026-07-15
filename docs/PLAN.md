@@ -38,6 +38,16 @@ main.py
 tests/
 ```
 
+**PoC 검토 결과 및 채택 여부**
+
+| 저장소 | 검토 내용 | 채택 여부 |
+|---|---|---|
+| ConsoleMVC | `model/` `view/` `controller/` 계층 분리, `main.py`에서 Controller가 Model+View를 조립해 `run()` 호출하는 구조 | 채택 — `src/controller`, `src/view` 계층 구조와 `main.py` 진입점 방식에 그대로 반영 (모델 계층은 `model` 대신 도메인 용어에 맞춰 `domain`으로 명명) |
+| DataPersistence | `JsonStorage`: tmp 파일에 쓴 뒤 `os.replace`로 원자적 저장, 저장 시점마다 파일 전체를 JSON으로 덮어씀 | 채택 — `src/storage`의 JsonStorage 저장 방식(tmp+replace)으로 그대로 반영 |
+| DataPersistence | `FileLock`으로 스레드/프로세스 간 상호배제 보장 | 미채택 — 본 시스템은 단일 프로세스 콘솔 앱으로 동시 접근이 없어 불필요한 복잡도로 판단, 생략 |
+| DataPersistence | `Repository`가 dict 기반 CRUD(create/read_all/read_one/update/delete)를 수행하고 모델의 `to_dict`/`from_dict`로 변환 | 채택 — `SampleRepository`/`OrderRepository` 설계에 동일 패턴 적용 예정 (세부 항목 3) |
+| DataMonitor, DummyDataGenerator | 각각 데이터 모니터링 Tool, Dummy 데이터 생성 Tool로 확인만 하고 상세 코드는 미검토 | 이번 Phase 0 범위에서는 미채택 — 필요 시 이후 Phase(모니터링/테스트 데이터 준비)에서 재검토 |
+
 **세부 진행 항목**
 
 1. 🔧 `src/domain` 도메인 모델 정의: `Sample`, `OrderStatus`(Enum), `Order` (순수 데이터
