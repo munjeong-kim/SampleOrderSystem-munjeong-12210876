@@ -292,16 +292,22 @@ tests/
   - **사용자 피드백으로 최종 변경**: 출고 처리가 실제로 하는 일이 있어야 한다는 논리로,
     **재고 차감 시점을 `CONFIRMED` 전환이 아니라 `CONFIRMED` → `RELEASE`(출고) 전환
     시점으로 최종 변경**했다.
-  - **최종 규칙**: 승인(`OrderController.approve()`)은 상태(`CONFIRMED`/`PRODUCING`)만
-    전환하고 재고는 건드리지 않는다. 생산 완료(`ProductionController._complete_job()`)는
-    실생산량 전량을 재고에 더하기만 한다(주문 수량 차감 없음). 출고
-    (`ShipmentController.ship()`)에서 `CONFIRMED` → `RELEASE`로 전환하며
+  - **재고 차감 시점 규칙(유지)**: 물리적 `stock_quantity`는 승인 시점에는 변하지 않는다.
+    생산 완료(`ProductionController._complete_job()`)는 실생산량 전량을 재고에 더하기만
+    한다. 출고(`ShipmentController.ship()`)에서 `CONFIRMED` → `RELEASE`로 전환하며
     `sample.stock_quantity -= order.quantity`로 재고를 차감한다.
-  - **알려진 트레이드오프**: 이 변경으로 이중 할당 가능성이 다시 열려 있다. 승인 시점에는
-    재고가 줄지 않으므로, 같은 시료에 대해 재고보다 많은 합계의 여러 주문이 동시에
-    "재고 충분"으로 판정되어 모두 `CONFIRMED`될 수 있다(예: 재고 100인데 50짜리 + 80짜리
-    주문이 둘 다 승인 가능). 사용자가 이 트레이드오프를 인지하고 받아들이기로 했으며,
-    별도의 방지 로직은 이번 범위에 포함하지 않는다.
+  - **근본 원인 및 최종 해결**: 재고 차감 시점을 출고로 옮긴 뒤에도, 승인 시 재고 충분/부족
+    판단이 물리적 `stock_quantity`만 보고 이미 다른 주문이 `CONFIRMED`로 확정해간(아직
+    출고 전이라 재고에서는 안 빠진) 수량을 고려하지 않아 이중 할당이 재발할 수 있음을
+    확인했다. 이를 근본적으로 해결하기 위해 `OrderController.approve()`의 판단 기준을
+    **가용재고 = stock_quantity − 아직 출고되지 않은(해당 시료의 `CONFIRMED` 상태) 주문
+    수량 합**으로 변경했다. `order.quantity <= 가용재고`면 `CONFIRMED`, 아니면
+    `PRODUCING`(부족분 = `order.quantity - 가용재고` 기준으로 실생산량/총생산시간 계산).
+    이 불변 조건("CONFIRMED 주문들의 합계는 항상 실제 재고 이하")이 유지되는 한, 출고
+    시점에 재고가 모자라는 상황 자체가 원천적으로 발생하지 않는다.
+  - **영향받지 않는 부분**: `ProductionController._complete_job()`과
+    `ShipmentController.ship()`은 이번 변경과 무관하며, 물리적 `stock_quantity` 증감 로직은
+    그대로 유지된다. 가용재고 계산은 오직 승인 판단에만 사용된다.
 
 ---
 
