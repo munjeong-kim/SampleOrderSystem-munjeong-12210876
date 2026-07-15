@@ -81,3 +81,10 @@ class ConsoleView:
 
     def get_order_menu_choice(self) -> str:
         return input("메뉴를 선택하세요: ")
+
+    def show_order_list(self, orders: list) -> None:
+        for order in orders:
+            print(
+                f"{order.order_id} | {order.sample_id} | "
+                f"{order.customer_name} | 수량: {order.quantity}"
+            )

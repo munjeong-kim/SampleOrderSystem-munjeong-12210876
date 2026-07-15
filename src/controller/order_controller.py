@@ -1,6 +1,6 @@
 from datetime import date
 
-from src.domain.models import Order
+from src.domain.models import Order, OrderStatus
 
 INVALID_INPUT_MESSAGE = "잘못된 입력입니다. 다시 입력해주세요."
 
@@ -41,6 +41,19 @@ class OrderController:
         sequence = existing_count + 1
 
         return f"{prefix}{sequence:04d}"
+
+    def list_pending_orders(self) -> None:
+        orders = [
+            order
+            for order in self.order_repository.read_all()
+            if order.status == OrderStatus.RESERVED
+        ]
+
+        if not orders:
+            self.view.show_message("접수된 주문이 없습니다.")
+            return
+
+        self.view.show_order_list(orders)
 
     def run_submenu(self) -> None:
         while True:
