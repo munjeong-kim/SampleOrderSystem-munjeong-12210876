@@ -182,3 +182,28 @@ def test_모니터링_컨트롤러가_없으면_메뉴_4_입력시_기존_안내
     assert view.show_message.call_count == 2
     assert "구현되지 않" in view.show_message.call_args_list[0][0][0]
     assert "종료" in view.show_message.call_args_list[1][0][0]
+
+
+def test_출고_컨트롤러가_주어지면_메뉴_6_입력시_서브메뉴가_호출된다(mocker):
+    view = mocker.MagicMock()
+    view.get_menu_choice.side_effect = ["6", "0"]
+    shipment_controller = mocker.MagicMock()
+    controller = MainController(view, shipment_controller=shipment_controller)
+
+    controller.run()
+
+    shipment_controller.run_submenu.assert_called_once()
+    view.show_message.assert_called_once()
+    assert "종료" in view.show_message.call_args_list[0][0][0]
+
+
+def test_출고_컨트롤러가_없으면_메뉴_6_입력시_기존_안내가_유지된다(mocker):
+    view = mocker.MagicMock()
+    view.get_menu_choice.side_effect = ["6", "0"]
+    controller = MainController(view)
+
+    controller.run()
+
+    assert view.show_message.call_count == 2
+    assert "구현되지 않" in view.show_message.call_args_list[0][0][0]
+    assert "종료" in view.show_message.call_args_list[1][0][0]
