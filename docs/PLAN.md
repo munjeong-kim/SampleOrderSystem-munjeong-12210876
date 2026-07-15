@@ -189,9 +189,9 @@ tests/
 1. ✅ 신규 `MonitoringController(view, order_repository, sample_repository)` +
    `show_order_status_summary()` — REJECTED 제외 상태별(RESERVED/CONFIRMED/PRODUCING/RELEASE)
    주문 건수 집계, 0건인 상태도 결과에 포함
-2. 🔧 `show_stock_status()` — 시료별 RESERVED 주문 수량 합(필요 수량) 산출 후 고갈/부족/여유
+2. ✅ `show_stock_status()` — 시료별 RESERVED 주문 수량 합(필요 수량) 산출 후 고갈/부족/여유
    판정하여 view에 전달
-3. ☐ `run_submenu()` — 기존 Controller들과 동일한 dispatch 패턴("1.주문량 확인/2.재고량
+3. 🔧 `run_submenu()` — 기존 Controller들과 동일한 dispatch 패턴("1.주문량 확인/2.재고량
    확인/0.뒤로가기")
 4. ☐ 메인 메뉴(4번)에 모니터링 서브메뉴 연결 (`MainController`에 `monitoring_controller=None`
    파라미터 추가 + `main.py` 조립)
