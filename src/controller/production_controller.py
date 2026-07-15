@@ -35,14 +35,11 @@ class ProductionController:
             self._complete_job(job)
 
     def _complete_job(self, job) -> None:
-        order = self.order_repository.read_one(job.order_id)
-
         sample = self.sample_repository.read_one(job.sample_id)
-        # 실생산량은 재고에 더하고, 이번에 CONFIRMED로 전환되는 주문 수량만큼은 차감한다
-        # (승인 시 즉시 CONFIRMED되는 경우와 동일한 재고 차감 규칙).
-        sample.stock_quantity += job.quantity - order.quantity
+        sample.stock_quantity += job.quantity
         self.sample_repository.update(sample)
 
+        order = self.order_repository.read_one(job.order_id)
         order.status = OrderStatus.CONFIRMED
         self.order_repository.update(order)
 

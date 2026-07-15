@@ -84,8 +84,6 @@ class OrderController:
         sample = self.sample_repository.read_one(order.sample_id)
         if order.quantity <= sample.stock_quantity:
             order.status = OrderStatus.CONFIRMED
-            sample.stock_quantity -= order.quantity
-            self.sample_repository.update(sample)
         else:
             order.status = OrderStatus.PRODUCING
             self._enqueue_production_job(order, sample)

@@ -30,7 +30,7 @@ if __name__ == "__main__":
         view, production_queue_repository, order_repository, sample_repository
     )
     monitoring_controller = MonitoringController(view, order_repository, sample_repository)
-    shipment_controller = ShipmentController(view, order_repository)
+    shipment_controller = ShipmentController(view, order_repository, sample_repository)
 
     MainController(
         view,

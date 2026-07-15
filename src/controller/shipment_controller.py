@@ -3,9 +3,10 @@ from src.domain.models import OrderStatus
 
 
 class ShipmentController:
-    def __init__(self, view, order_repository):
+    def __init__(self, view, order_repository, sample_repository):
         self.view = view
         self.order_repository = order_repository
+        self.sample_repository = sample_repository
 
     def _get_confirmed_orders(self) -> list:
         return [
@@ -27,6 +28,11 @@ class ShipmentController:
 
         order.status = OrderStatus.RELEASE
         self.order_repository.update(order)
+
+        sample = self.sample_repository.read_one(order.sample_id)
+        sample.stock_quantity -= order.quantity
+        self.sample_repository.update(sample)
+
         self.view.show_message(
             f"주문이 {order.status.name} 상태로 전환되었습니다: {order_id}"
         )
