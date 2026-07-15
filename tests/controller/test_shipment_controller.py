@@ -107,3 +107,117 @@ def test_CONFIRMED_상태_주문만_필터링된다(tmp_path, mocker):
     orders = controller._get_confirmed_orders()
 
     assert [o.order_id for o in orders] == ["ORD-0001"]
+
+
+def test_서브메뉴_진입시_CONFIRMED_주문이_번호와_함께_자동으로_표시된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    order_repository = _make_repository(tmp_path)
+    order_repository.create(
+        Order(order_id="ORD-0001", sample_id="S-001", customer_name="홍길동", quantity=10, status=OrderStatus.CONFIRMED)
+    )
+    order_repository.create(
+        Order(order_id="ORD-0002", sample_id="S-002", customer_name="김철수", quantity=20, status=OrderStatus.CONFIRMED)
+    )
+    controller = ShipmentController(view, order_repository)
+    view.get_shipment_menu_choice.side_effect = ["0"]
+
+    controller.run_submenu()
+
+    view.show_numbered_order_list.assert_called_once()
+    orders = view.show_numbered_order_list.call_args[0][0]
+    assert [o.order_id for o in orders] == ["ORD-0001", "ORD-0002"]
+
+
+def test_출고_가능한_주문이_없으면_안내_메시지만_표시되고_메뉴는_계속_진행된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    order_repository = _make_repository(tmp_path)
+    controller = ShipmentController(view, order_repository)
+    view.get_shipment_menu_choice.side_effect = ["0"]
+
+    controller.run_submenu()
+
+    view.show_numbered_order_list.assert_not_called()
+    assert any(
+        "출고 가능한 주문이 없습니다" in call.args[0] for call in view.show_message.call_args_list
+    )
+
+
+def test_1_선택_후_유효한_번호를_입력하면_해당_주문이_출고된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    order_repository = _make_repository(tmp_path)
+    order_repository.create(
+        Order(order_id="ORD-0001", sample_id="S-001", customer_name="홍길동", quantity=10, status=OrderStatus.CONFIRMED)
+    )
+    order_repository.create(
+        Order(order_id="ORD-0002", sample_id="S-002", customer_name="김철수", quantity=20, status=OrderStatus.CONFIRMED)
+    )
+    controller = ShipmentController(view, order_repository)
+    mocker.patch.object(controller, "ship")
+    view.get_shipment_menu_choice.side_effect = ["1", "0"]
+    view.get_order_selection_number.return_value = 2
+
+    controller.run_submenu()
+
+    controller.ship.assert_called_once_with("ORD-0002")
+
+
+def test_목록_범위를_벗어난_번호_입력시_오류_안내_후_계속_진행된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    order_repository = _make_repository(tmp_path)
+    order_repository.create(
+        Order(order_id="ORD-0001", sample_id="S-001", customer_name="홍길동", quantity=10, status=OrderStatus.CONFIRMED)
+    )
+    controller = ShipmentController(view, order_repository)
+    mocker.patch.object(controller, "ship")
+    view.get_shipment_menu_choice.side_effect = ["1", "0"]
+    view.get_order_selection_number.return_value = 5
+
+    controller.run_submenu()
+
+    controller.ship.assert_not_called()
+    assert any(
+        "잘못된 번호" in call.args[0] for call in view.show_message.call_args_list
+    )
+
+
+def test_주문이_없는_상태에서_1을_선택하면_오류_안내_후_계속_진행된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    order_repository = _make_repository(tmp_path)
+    controller = ShipmentController(view, order_repository)
+    mocker.patch.object(controller, "ship")
+    view.get_shipment_menu_choice.side_effect = ["1", "0"]
+
+    controller.run_submenu()
+
+    controller.ship.assert_not_called()
+    assert any(
+        "선택할 주문이 없습니다" in call.args[0] for call in view.show_message.call_args_list
+    )
+
+
+def test_서브메뉴에서_0_선택시_바로_루프가_종료된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    order_repository = _make_repository(tmp_path)
+    controller = ShipmentController(view, order_repository)
+    mocker.patch.object(controller, "ship")
+    view.get_shipment_menu_choice.side_effect = ["0"]
+
+    controller.run_submenu()
+
+    controller.ship.assert_not_called()
+
+
+def test_서브메뉴에서_잘못된_입력시_안내_메시지_출력_후_계속_진행한다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    order_repository = _make_repository(tmp_path)
+    order_repository.create(
+        Order(order_id="ORD-0001", sample_id="S-001", customer_name="홍길동", quantity=10, status=OrderStatus.CONFIRMED)
+    )
+    controller = ShipmentController(view, order_repository)
+    view.get_shipment_menu_choice.side_effect = ["xyz", "0"]
+
+    controller.run_submenu()
+
+    assert any(
+        "잘못된 입력입니다" in call.args[0] for call in view.show_message.call_args_list
+    )
