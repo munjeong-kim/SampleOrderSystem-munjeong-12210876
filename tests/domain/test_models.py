@@ -1,4 +1,4 @@
-from src.domain.models import Order, OrderStatus, Sample
+from src.domain.models import Order, OrderStatus, ProductionJob, Sample
 
 
 def test_시료_생성_시_속성이_올바르게_저장된다():
@@ -59,3 +59,40 @@ def test_주문_생성_시_기본_상태는_RESERVED이다():
     )
 
     assert order.status == OrderStatus.RESERVED
+
+
+def test_생산작업_생성_시_속성이_올바르게_저장된다():
+    job = ProductionJob(
+        order_id="ORD-20260416-0043",
+        sample_id="S-001",
+        quantity=185,
+        total_seconds=1850.0,
+    )
+
+    assert job.order_id == "ORD-20260416-0043"
+    assert job.sample_id == "S-001"
+    assert job.quantity == 185
+    assert job.total_seconds == 1850.0
+
+
+def test_생산작업_생성_시_started_at_기본값은_None이다():
+    job = ProductionJob(
+        order_id="ORD-20260416-0043",
+        sample_id="S-001",
+        quantity=185,
+        total_seconds=1850.0,
+    )
+
+    assert job.started_at is None
+
+
+def test_생산작업_생성_시_started_at을_직접_지정할_수_있다():
+    job = ProductionJob(
+        order_id="ORD-20260416-0043",
+        sample_id="S-001",
+        quantity=185,
+        total_seconds=1850.0,
+        started_at="2026-04-16T09:00:00",
+    )
+
+    assert job.started_at == "2026-04-16T09:00:00"
