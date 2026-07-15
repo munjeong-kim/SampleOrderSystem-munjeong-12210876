@@ -1,6 +1,7 @@
 import os
 
 from src.controller.main_controller import MainController
+from src.controller.monitoring_controller import MonitoringController
 from src.controller.order_controller import OrderController
 from src.controller.production_controller import ProductionController
 from src.controller.sample_controller import SampleController
@@ -27,10 +28,12 @@ if __name__ == "__main__":
     production_controller = ProductionController(
         view, production_queue_repository, order_repository, sample_repository
     )
+    monitoring_controller = MonitoringController(view, order_repository, sample_repository)
 
     MainController(
         view,
         sample_controller=sample_controller,
         order_controller=order_controller,
         production_controller=production_controller,
+        monitoring_controller=monitoring_controller,
     ).run()

@@ -193,7 +193,7 @@ tests/
    판정하여 view에 전달
 3. ✅ `run_submenu()` — 기존 Controller들과 동일한 dispatch 패턴("1.주문량 확인/2.재고량
    확인/0.뒤로가기")
-4. 🔧 메인 메뉴(4번)에 모니터링 서브메뉴 연결 (`MainController`에 `monitoring_controller=None`
+4. ✅ 메인 메뉴(4번)에 모니터링 서브메뉴 연결 (`MainController`에 `monitoring_controller=None`
    파라미터 추가 + `main.py` 조립)
 
 **참고 문서**: [04-monitoring.md](features/04-monitoring.md)
