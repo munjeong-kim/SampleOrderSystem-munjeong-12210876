@@ -55,15 +55,22 @@ class OrderController:
 
         self.view.show_order_list(orders)
 
-    def approve(self, order_id: str) -> None:
+    def _get_reserved_order(self, order_id: str, action_label: str):
         order = self.order_repository.read_one(order_id)
 
         if order is None:
             self.view.show_message(f"존재하지 않는 주문입니다: {order_id}")
-            return
+            return None
 
         if order.status != OrderStatus.RESERVED:
-            self.view.show_message(f"승인할 수 없는 상태입니다: {order_id}")
+            self.view.show_message(f"{action_label}할 수 없는 상태입니다: {order_id}")
+            return None
+
+        return order
+
+    def approve(self, order_id: str) -> None:
+        order = self._get_reserved_order(order_id, "승인")
+        if order is None:
             return
 
         sample = self.sample_repository.read_one(order.sample_id)
@@ -78,14 +85,8 @@ class OrderController:
         )
 
     def reject(self, order_id: str) -> None:
-        order = self.order_repository.read_one(order_id)
-
+        order = self._get_reserved_order(order_id, "거절")
         if order is None:
-            self.view.show_message(f"존재하지 않는 주문입니다: {order_id}")
-            return
-
-        if order.status != OrderStatus.RESERVED:
-            self.view.show_message(f"거절할 수 없는 상태입니다: {order_id}")
             return
 
         order.status = OrderStatus.REJECTED
