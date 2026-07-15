@@ -46,3 +46,38 @@ class SampleController:
             return
 
         self.view.show_search_results(results)
+
+    def run_submenu(self) -> None:
+        while True:
+            self.view.show_sample_menu()
+            choice = self.view.get_sample_menu_choice()
+
+            if choice == "1":
+                self.register()
+            elif choice == "2":
+                self._list_samples_with_navigation()
+            elif choice == "3":
+                keyword = self.view.get_search_keyword()
+                self.search(keyword)
+            elif choice == "0":
+                break
+            else:
+                self.view.show_message("잘못된 입력입니다. 다시 입력해주세요.")
+
+    def _list_samples_with_navigation(self) -> None:
+        page = self.view.get_page_number()
+        self.list_samples(page)
+
+        while True:
+            navigation = self.view.get_list_navigation_choice()
+
+            if navigation == "n":
+                page += 1
+                self.list_samples(page)
+            elif navigation == "p":
+                page -= 1
+                self.list_samples(page)
+            elif navigation == "b":
+                return
+            else:
+                self.view.show_message("잘못된 입력입니다. 다시 입력해주세요.")

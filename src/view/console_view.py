@@ -43,3 +43,22 @@ class ConsoleView:
             f"평균 생산시간: {sample.avg_production_time} | 수율: {sample.yield_rate} | "
             f"재고: {sample.stock_quantity}"
         )
+
+    def show_sample_menu(self) -> None:
+        print("=== 시료 관리 ===")
+        print("1. 시료 등록")
+        print("2. 시료 목록 조회")
+        print("3. 시료 검색")
+        print("0. 뒤로가기")
+
+    def get_sample_menu_choice(self) -> str:
+        return input("메뉴를 선택하세요: ")
+
+    def get_page_number(self) -> int:
+        return int(input("조회할 페이지 번호를 입력하세요: "))
+
+    def get_list_navigation_choice(self) -> str:
+        return input("다음 페이지(n) / 이전 페이지(p) / 뒤로가기(b): ")
+
+    def get_search_keyword(self) -> str:
+        return input("검색어를 입력하세요: ")
