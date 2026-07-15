@@ -246,7 +246,7 @@ tests/
    건수/생산 라인 대기 건수를 계산해 view에 전달 (메뉴 1~6 라우팅은 Phase 1~6에서 이미 완료)
 2. ✅ 콘솔 출력 가독성 개선 — 메뉴/목록/결과 출력 형식을 일관된 스타일로 정리 (동작은
    변경하지 않고 출력 포맷만 개선)
-3. 🔧 전체 플로우 수동 점검(End-to-End) — RESERVED → 승인 → PRODUCING → 생산 완료 →
+3. ✅ 전체 플로우 수동 점검(End-to-End) — RESERVED → 승인 → PRODUCING → 생산 완료 →
    CONFIRMED → 출고 → RELEASE 전체 경로 및 모니터링 집계 확인
 
 **참고 문서**: [00-overview.md](features/00-overview.md)
