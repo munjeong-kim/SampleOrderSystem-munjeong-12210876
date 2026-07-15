@@ -3,6 +3,7 @@ import math
 from src.domain.models import Sample
 
 PAGE_SIZE = 5
+INVALID_INPUT_MESSAGE = "잘못된 입력입니다. 다시 입력해주세요."
 
 
 class SampleController:
@@ -62,7 +63,7 @@ class SampleController:
             elif choice == "0":
                 break
             else:
-                self.view.show_message("잘못된 입력입니다. 다시 입력해주세요.")
+                self.view.show_message(INVALID_INPUT_MESSAGE)
 
     def _list_samples_with_navigation(self) -> None:
         page = self.view.get_page_number()
@@ -80,4 +81,4 @@ class SampleController:
             elif navigation == "b":
                 return
             else:
-                self.view.show_message("잘못된 입력입니다. 다시 입력해주세요.")
+                self.view.show_message(INVALID_INPUT_MESSAGE)
