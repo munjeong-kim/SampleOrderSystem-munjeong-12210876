@@ -14,3 +14,16 @@ class ConsoleView:
 
     def show_message(self, message: str) -> None:
         print(message)
+
+    def get_sample_registration_input(self) -> dict:
+        sample_id = input("시료 ID: ")
+        name = input("이름: ")
+        avg_production_time = float(input("평균 생산시간(sec/ea): "))
+        yield_rate = float(input("수율: "))
+
+        return {
+            "sample_id": sample_id,
+            "name": name,
+            "avg_production_time": avg_production_time,
+            "yield_rate": yield_rate,
+        }
