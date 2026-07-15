@@ -1,15 +1,17 @@
-from datetime import date
+import math
+from datetime import date, datetime
 
-from src.domain.models import Order, OrderStatus
+from src.domain.models import Order, OrderStatus, ProductionJob
 
 INVALID_INPUT_MESSAGE = "잘못된 입력입니다. 다시 입력해주세요."
 
 
 class OrderController:
-    def __init__(self, view, order_repository, sample_repository):
+    def __init__(self, view, order_repository, sample_repository, production_queue_repository):
         self.view = view
         self.order_repository = order_repository
         self.sample_repository = sample_repository
+        self.production_queue_repository = production_queue_repository
         self._submenu_handlers = {
             "1": lambda: self.reserve(),
         }
@@ -81,11 +83,29 @@ class OrderController:
             order.status = OrderStatus.CONFIRMED
         else:
             order.status = OrderStatus.PRODUCING
+            self._enqueue_production_job(order, sample)
 
         self.order_repository.update(order)
         self.view.show_message(
             f"주문이 승인되어 {order.status.name} 상태로 전환되었습니다: {order_id}"
         )
+
+    def _enqueue_production_job(self, order: Order, sample) -> None:
+        shortage = order.quantity - sample.stock_quantity
+        actual_quantity = math.ceil(shortage / sample.yield_rate)
+        total_seconds = sample.avg_production_time * actual_quantity
+
+        is_queue_empty = self.production_queue_repository.read_head() is None
+        started_at = datetime.now().isoformat() if is_queue_empty else None
+
+        job = ProductionJob(
+            order_id=order.order_id,
+            sample_id=order.sample_id,
+            quantity=actual_quantity,
+            total_seconds=total_seconds,
+            started_at=started_at,
+        )
+        self.production_queue_repository.enqueue(job)
 
     def reject(self, order_id: str) -> None:
         order = self._get_reserved_order(order_id, "거절")
