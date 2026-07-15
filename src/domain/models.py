@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from enum import Enum, auto
 
 
@@ -18,6 +18,13 @@ class Sample:
     yield_rate: float
     stock_quantity: int = 0
 
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Sample":
+        return cls(**data)
+
 
 @dataclass
 class Order:
@@ -26,3 +33,14 @@ class Order:
     customer_name: str
     quantity: int
     status: OrderStatus = OrderStatus.RESERVED
+
+    def to_dict(self) -> dict:
+        data = asdict(self)
+        data["status"] = self.status.name
+        return data
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Order":
+        data = dict(data)
+        data["status"] = OrderStatus[data["status"]]
+        return cls(**data)
