@@ -167,3 +167,80 @@ def test_접수된_주문이_없으면_안내_메시지가_출력된다(tmp_path
     view.show_order_list.assert_not_called()
     view.show_message.assert_called_once()
     assert "접수된 주문이 없습니다" in view.show_message.call_args[0][0]
+
+
+def test_재고가_충분한_주문을_승인하면_CONFIRMED로_전환되고_성공_메시지가_출력된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository = _make_repositories(tmp_path)
+    sample = Sample(
+        sample_id="S-001", name="실리콘 웨이퍼-8인치", avg_production_time=1.0, yield_rate=0.9, stock_quantity=100
+    )
+    sample_repository.create(sample)
+    order_repository.create(
+        Order(order_id="ORD-20260416-0001", sample_id="S-001", customer_name="홍길동", quantity=100)
+    )
+    controller = OrderController(view, order_repository, sample_repository)
+
+    controller.approve("ORD-20260416-0001")
+
+    order = order_repository.read_one("ORD-20260416-0001")
+    assert order.status == OrderStatus.CONFIRMED
+    view.show_message.assert_called_once()
+    assert "CONFIRMED" in view.show_message.call_args[0][0]
+
+
+def test_재고가_부족한_주문을_승인하면_PRODUCING으로_전환되고_성공_메시지가_출력된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository = _make_repositories(tmp_path)
+    sample = Sample(
+        sample_id="S-001", name="실리콘 웨이퍼-8인치", avg_production_time=1.0, yield_rate=0.9, stock_quantity=50
+    )
+    sample_repository.create(sample)
+    order_repository.create(
+        Order(order_id="ORD-20260416-0001", sample_id="S-001", customer_name="홍길동", quantity=100)
+    )
+    controller = OrderController(view, order_repository, sample_repository)
+
+    controller.approve("ORD-20260416-0001")
+
+    order = order_repository.read_one("ORD-20260416-0001")
+    assert order.status == OrderStatus.PRODUCING
+    view.show_message.assert_called_once()
+    assert "PRODUCING" in view.show_message.call_args[0][0]
+
+
+def test_존재하지_않는_주문번호로_승인_시도하면_오류_메시지가_출력된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository = _make_repositories(tmp_path)
+    controller = OrderController(view, order_repository, sample_repository)
+
+    controller.approve("ORD-NOT-EXIST")
+
+    view.show_message.assert_called_once()
+    assert "존재하지 않는 주문" in view.show_message.call_args[0][0]
+
+
+def test_RESERVED가_아닌_주문을_승인_시도하면_오류_메시지가_출력되고_상태가_변경되지_않는다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository = _make_repositories(tmp_path)
+    sample = Sample(
+        sample_id="S-001", name="실리콘 웨이퍼-8인치", avg_production_time=1.0, yield_rate=0.9, stock_quantity=100
+    )
+    sample_repository.create(sample)
+    order_repository.create(
+        Order(
+            order_id="ORD-20260416-0001",
+            sample_id="S-001",
+            customer_name="홍길동",
+            quantity=100,
+            status=OrderStatus.CONFIRMED,
+        )
+    )
+    controller = OrderController(view, order_repository, sample_repository)
+
+    controller.approve("ORD-20260416-0001")
+
+    order = order_repository.read_one("ORD-20260416-0001")
+    assert order.status == OrderStatus.CONFIRMED
+    view.show_message.assert_called_once()
+    assert "승인할 수 없는 상태" in view.show_message.call_args[0][0]
