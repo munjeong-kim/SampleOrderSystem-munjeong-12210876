@@ -36,3 +36,13 @@ class SampleController:
         start = (page - 1) * PAGE_SIZE
         end = start + PAGE_SIZE
         self.view.show_sample_list(samples[start:end], page, total_pages)
+
+    def search(self, keyword: str) -> None:
+        samples = self.sample_repository.read_all()
+        results = [s for s in samples if keyword.lower() in s.name.lower()]
+
+        if not results:
+            self.view.show_message("검색 결과가 없습니다.")
+            return
+
+        self.view.show_search_results(results)

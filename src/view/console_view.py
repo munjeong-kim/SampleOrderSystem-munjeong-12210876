@@ -36,3 +36,11 @@ class ConsoleView:
                 f"재고: {sample.stock_quantity}"
             )
         print(f"{page}/{total_pages} 페이지")
+
+    def show_search_results(self, results: list) -> None:
+        for sample in results:
+            print(
+                f"{sample.sample_id} | {sample.name} | "
+                f"평균 생산시간: {sample.avg_production_time} | 수율: {sample.yield_rate} | "
+                f"재고: {sample.stock_quantity}"
+            )
