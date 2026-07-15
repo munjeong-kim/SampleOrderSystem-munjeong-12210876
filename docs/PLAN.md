@@ -130,7 +130,9 @@ tests/
    상태 전환만 다루고, FIFO 생산 큐 처리는 Phase 4에서 추가)
 3. ✅ 주문 거절 처리 — `RESERVED` → `REJECTED`
 4. 🔧 메인 메뉴(3번)에 주문 승인/거절 서브메뉴 연결 (`OrderController.run_approval_submenu()`,
-   "2"번 접수 서브메뉴 `run_submenu()`와는 별개)
+   "2"번 접수 서브메뉴 `run_submenu()`와는 별개). UX 개선: 주문번호(`ORD-YYYYMMDD-NNNN`)를
+   직접 타이핑하는 대신, 서브메뉴 루프마다 `RESERVED` 주문 목록을 번호(1, 2, 3…)와 함께
+   자동으로 보여주고, 승인/거절 시 그 번호로 선택하게 한다 (메뉴는 "1.승인/2.거절/0.뒤로가기").
 
 **참고 문서**: [03-order-approval.md](features/03-order-approval.md)
 
