@@ -50,9 +50,10 @@ tests/
 
 **세부 진행 항목**
 
-1. 🔧 `src/domain` 도메인 모델 정의: `Sample`, `OrderStatus`(Enum), `Order` (순수 데이터
+1. ✅ `src/domain` 도메인 모델 정의: `Sample`, `OrderStatus`(Enum), `Order` (순수 데이터
    클래스, 비즈니스 로직 없음)
-2. ☐ `src/storage` JsonStorage 구현 (JSON 파일 저장, tmp+replace 원자적 쓰기)
+2. 🔧 `src/storage` JsonStorage 구현 (JSON 파일 저장, tmp+replace 원자적 쓰기; FileLock 등
+   파일 락은 단일 프로세스 콘솔 앱이라 미채택)
 3. ☐ `src/repository` SampleRepository, OrderRepository 구현
 4. ☐ 콘솔 앱 진입점(`main.py`) 및 최소한의 메뉴 루프 스켈레톤 (하위 메뉴는 이후 Phase에서 채움)
 
