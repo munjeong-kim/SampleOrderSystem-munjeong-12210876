@@ -44,3 +44,19 @@ class Order:
         data = dict(data)
         data["status"] = OrderStatus[data["status"]]
         return cls(**data)
+
+
+@dataclass
+class ProductionJob:
+    order_id: str
+    sample_id: str
+    quantity: int
+    total_seconds: float
+    started_at: str | None = None
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ProductionJob":
+        return cls(**data)
