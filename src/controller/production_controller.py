@@ -39,3 +39,23 @@ class ProductionController:
         self.order_repository.update(order)
 
         self.production_queue_repository.dequeue_head()
+
+    def show_status(self) -> None:
+        self.process_queue()
+
+        job = self.production_queue_repository.read_head()
+        if job is None:
+            self.view.show_message("현재 생산 중인 작업이 없습니다.")
+            return
+
+        self.view.show_current_production(job)
+
+    def show_waiting_queue(self) -> None:
+        self.process_queue()
+
+        jobs = self.production_queue_repository.read_all()
+        if not jobs:
+            self.view.show_message("대기 중인 생산 작업이 없습니다.")
+            return
+
+        self.view.show_production_queue(jobs)

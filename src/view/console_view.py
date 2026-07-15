@@ -107,3 +107,18 @@ class ConsoleView:
 
     def get_order_selection_number(self) -> int:
         return int(input("번호를 선택하세요: "))
+
+    def show_current_production(self, job) -> None:
+        print(
+            f"현재 생산 중: {job.order_id} | {job.sample_id} | "
+            f"실생산량: {job.quantity} | 시작 시각: {job.started_at} | "
+            f"총 생산 시간: {job.total_seconds}초"
+        )
+
+    def show_production_queue(self, jobs: list) -> None:
+        for number, job in enumerate(jobs, start=1):
+            status = "생산 중" if job.started_at is not None else "대기 중"
+            print(
+                f"{number}. {job.order_id} | {job.sample_id} | "
+                f"실생산량: {job.quantity} | {status}"
+            )
