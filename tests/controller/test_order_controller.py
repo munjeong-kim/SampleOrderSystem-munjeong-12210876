@@ -1,7 +1,7 @@
 from datetime import date
 
 from src.controller.order_controller import OrderController
-from src.domain.models import OrderStatus, Sample
+from src.domain.models import Order, OrderStatus, Sample
 from src.repository.order_repository import OrderRepository
 from src.repository.sample_repository import SampleRepository
 from src.storage.json_storage import JsonStorage
@@ -113,3 +113,57 @@ def test_서브메뉴에서_잘못된_입력시_안내_메시지_출력_후_계�
 
     view.show_message.assert_called_once()
     assert "잘못된" in view.show_message.call_args[0][0]
+
+
+def test_RESERVED_상태_주문만_목록에_표시된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository = _make_repositories(tmp_path)
+    order_repository.create(
+        Order(order_id="ORD-20260416-0001", sample_id="S-001", customer_name="홍길동", quantity=100)
+    )
+    order_repository.create(
+        Order(
+            order_id="ORD-20260416-0002",
+            sample_id="S-002",
+            customer_name="김철수",
+            quantity=50,
+            status=OrderStatus.CONFIRMED,
+        )
+    )
+    order_repository.create(
+        Order(
+            order_id="ORD-20260416-0003",
+            sample_id="S-003",
+            customer_name="이영희",
+            quantity=30,
+            status=OrderStatus.REJECTED,
+        )
+    )
+    controller = OrderController(view, order_repository, sample_repository)
+
+    controller.list_pending_orders()
+
+    view.show_order_list.assert_called_once()
+    orders = view.show_order_list.call_args[0][0]
+    assert [o.order_id for o in orders] == ["ORD-20260416-0001"]
+
+
+def test_접수된_주문이_없으면_안내_메시지가_출력된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository = _make_repositories(tmp_path)
+    order_repository.create(
+        Order(
+            order_id="ORD-20260416-0001",
+            sample_id="S-001",
+            customer_name="홍길동",
+            quantity=100,
+            status=OrderStatus.CONFIRMED,
+        )
+    )
+    controller = OrderController(view, order_repository, sample_repository)
+
+    controller.list_pending_orders()
+
+    view.show_order_list.assert_not_called()
+    view.show_message.assert_called_once()
+    assert "접수된 주문이 없습니다" in view.show_message.call_args[0][0]
