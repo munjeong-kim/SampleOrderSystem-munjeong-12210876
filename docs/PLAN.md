@@ -54,9 +54,11 @@ tests/
    클래스, 비즈니스 로직 없음)
 2. ✅ `src/storage` JsonStorage 구현 (JSON 파일 저장, tmp+replace 원자적 쓰기; FileLock 등
    파일 락은 단일 프로세스 콘솔 앱이라 미채택)
-3. 🔧 `src/repository` SampleRepository, OrderRepository 구현 (dict 기반 CRUD, 모델의
+3. ✅ `src/repository` SampleRepository, OrderRepository 구현 (dict 기반 CRUD, 모델의
    to_dict/from_dict 변환 활용)
-4. ☐ 콘솔 앱 진입점(`main.py`) 및 최소한의 메뉴 루프 스켈레톤 (하위 메뉴는 이후 Phase에서 채움)
+4. 🔧 콘솔 앱 진입점(`main.py`) 및 최소한의 메뉴 루프 스켈레톤 (`ConsoleView` + `MainController`,
+   메뉴 0~6 표시, 0 입력 시 종료, 1~6은 "아직 구현되지 않은 기능" 안내, 하위 메뉴는 이후
+   Phase에서 채움)
 
 **참고 문서**: [00-overview.md](features/00-overview.md)
 
