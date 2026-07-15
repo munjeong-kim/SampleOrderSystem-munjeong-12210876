@@ -10,6 +10,9 @@ class OrderController:
         self.view = view
         self.order_repository = order_repository
         self.sample_repository = sample_repository
+        self._submenu_handlers = {
+            "1": lambda: self.reserve(),
+        }
 
     def reserve(self) -> None:
         input_data = self.view.get_order_reservation_input()
@@ -44,9 +47,11 @@ class OrderController:
             self.view.show_order_menu()
             choice = self.view.get_order_menu_choice()
 
-            if choice == "1":
-                self.reserve()
-            elif choice == "0":
+            if choice == "0":
                 break
+
+            handler = self._submenu_handlers.get(choice)
+            if handler is not None:
+                handler()
             else:
                 self.view.show_message(INVALID_INPUT_MESSAGE)

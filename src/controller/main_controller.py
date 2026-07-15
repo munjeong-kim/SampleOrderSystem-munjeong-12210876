@@ -8,6 +8,12 @@ class MainController:
         self.order_controller = order_controller
 
     def run(self) -> None:
+        handlers = {}
+        if self.sample_controller is not None:
+            handlers["1"] = self.sample_controller.run_submenu
+        if self.order_controller is not None:
+            handlers["2"] = self.order_controller.run_submenu
+
         while True:
             self.view.show_menu()
             choice = self.view.get_menu_choice()
@@ -15,10 +21,10 @@ class MainController:
             if choice == "0":
                 self.view.show_message("프로그램을 종료합니다.")
                 break
-            elif choice == "1" and self.sample_controller is not None:
-                self.sample_controller.run_submenu()
-            elif choice == "2" and self.order_controller is not None:
-                self.order_controller.run_submenu()
+
+            handler = handlers.get(choice)
+            if handler is not None:
+                handler()
             elif choice in IMPLEMENTED_MENU_CHOICES:
                 self.view.show_message("아직 구현되지 않은 기능입니다.")
             else:

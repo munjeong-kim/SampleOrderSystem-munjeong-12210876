@@ -10,6 +10,11 @@ class SampleController:
     def __init__(self, view, sample_repository):
         self.view = view
         self.sample_repository = sample_repository
+        self._submenu_handlers = {
+            "1": lambda: self.register(),
+            "2": lambda: self._list_samples_with_navigation(),
+            "3": lambda: self.search(self.view.get_search_keyword()),
+        }
 
     def register(self) -> None:
         input_data = self.view.get_sample_registration_input()
@@ -53,15 +58,12 @@ class SampleController:
             self.view.show_sample_menu()
             choice = self.view.get_sample_menu_choice()
 
-            if choice == "1":
-                self.register()
-            elif choice == "2":
-                self._list_samples_with_navigation()
-            elif choice == "3":
-                keyword = self.view.get_search_keyword()
-                self.search(keyword)
-            elif choice == "0":
+            if choice == "0":
                 break
+
+            handler = self._submenu_handlers.get(choice)
+            if handler is not None:
+                handler()
             else:
                 self.view.show_message(INVALID_INPUT_MESSAGE)
 
