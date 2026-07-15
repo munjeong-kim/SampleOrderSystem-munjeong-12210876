@@ -1,3 +1,5 @@
+from datetime import datetime
+
 IMPLEMENTED_MENU_CHOICES = {"1", "2", "3", "4", "5", "6"}
 
 
@@ -33,6 +35,7 @@ class MainController:
             handlers["6"] = self.shipment_controller.run_submenu
 
         while True:
+            self.view.show_system_stats(self._compute_stats())
             self.view.show_menu()
             choice = self.view.get_menu_choice()
 
@@ -47,3 +50,32 @@ class MainController:
                 self.view.show_message("아직 구현되지 않은 기능입니다.")
             else:
                 self.view.show_message("잘못된 입력입니다. 다시 입력해주세요.")
+
+    def _compute_stats(self) -> dict:
+        if self.sample_controller is not None:
+            samples = self.sample_controller.sample_repository.read_all()
+            sample_count = len(samples)
+            total_stock = sum(sample.stock_quantity for sample in samples)
+        else:
+            sample_count = 0
+            total_stock = 0
+
+        if self.order_controller is not None:
+            order_count = len(self.order_controller.order_repository.read_all())
+        else:
+            order_count = 0
+
+        if self.production_controller is not None:
+            queue_count = len(
+                self.production_controller.production_queue_repository.read_all()
+            )
+        else:
+            queue_count = 0
+
+        return {
+            "current_time": datetime.now(),
+            "sample_count": sample_count,
+            "total_stock": total_stock,
+            "order_count": order_count,
+            "queue_count": queue_count,
+        }

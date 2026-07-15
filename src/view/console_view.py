@@ -1,4 +1,11 @@
 class ConsoleView:
+    def show_system_stats(self, stats: dict) -> None:
+        print(f"현재 시각: {stats['current_time']}")
+        print(
+            f"등록 시료 종수: {stats['sample_count']} | 총 재고 수량: {stats['total_stock']} | "
+            f"전체 주문 건수: {stats['order_count']} | 생산 라인 대기 건수: {stats['queue_count']}"
+        )
+
     def show_menu(self) -> None:
         print("=== S-Semi 반도체 시료 생산주문관리 시스템 ===")
         print("1. 시료 관리")
