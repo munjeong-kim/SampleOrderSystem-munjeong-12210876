@@ -13,6 +13,7 @@ class MainController:
             handlers["1"] = self.sample_controller.run_submenu
         if self.order_controller is not None:
             handlers["2"] = self.order_controller.run_submenu
+            handlers["3"] = self.order_controller.run_approval_submenu
 
         while True:
             self.view.show_menu()

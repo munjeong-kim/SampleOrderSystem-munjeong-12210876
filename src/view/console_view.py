@@ -88,3 +88,16 @@ class ConsoleView:
                 f"{order.order_id} | {order.sample_id} | "
                 f"{order.customer_name} | 수량: {order.quantity}"
             )
+
+    def show_order_approval_menu(self) -> None:
+        print("=== 주문 승인/거절 ===")
+        print("1. 접수된 주문 목록 조회")
+        print("2. 주문 승인")
+        print("3. 주문 거절")
+        print("0. 뒤로가기")
+
+    def get_order_approval_menu_choice(self) -> str:
+        return input("메뉴를 선택하세요: ")
+
+    def get_order_id_input(self) -> str:
+        return input("주문번호를 입력하세요: ")

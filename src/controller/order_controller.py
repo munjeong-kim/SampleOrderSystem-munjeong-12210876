@@ -13,6 +13,11 @@ class OrderController:
         self._submenu_handlers = {
             "1": lambda: self.reserve(),
         }
+        self._approval_submenu_handlers = {
+            "1": lambda: self.list_pending_orders(),
+            "2": lambda: self.approve(self.view.get_order_id_input()),
+            "3": lambda: self.reject(self.view.get_order_id_input()),
+        }
 
     def reserve(self) -> None:
         input_data = self.view.get_order_reservation_input()
@@ -104,6 +109,20 @@ class OrderController:
                 break
 
             handler = self._submenu_handlers.get(choice)
+            if handler is not None:
+                handler()
+            else:
+                self.view.show_message(INVALID_INPUT_MESSAGE)
+
+    def run_approval_submenu(self) -> None:
+        while True:
+            self.view.show_order_approval_menu()
+            choice = self.view.get_order_approval_menu_choice()
+
+            if choice == "0":
+                break
+
+            handler = self._approval_submenu_handlers.get(choice)
             if handler is not None:
                 handler()
             else:
