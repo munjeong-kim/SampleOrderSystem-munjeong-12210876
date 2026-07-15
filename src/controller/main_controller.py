@@ -2,10 +2,17 @@ IMPLEMENTED_MENU_CHOICES = {"1", "2", "3", "4", "5", "6"}
 
 
 class MainController:
-    def __init__(self, view, sample_controller=None, order_controller=None):
+    def __init__(
+        self,
+        view,
+        sample_controller=None,
+        order_controller=None,
+        production_controller=None,
+    ):
         self.view = view
         self.sample_controller = sample_controller
         self.order_controller = order_controller
+        self.production_controller = production_controller
 
     def run(self) -> None:
         handlers = {}
@@ -14,6 +21,8 @@ class MainController:
         if self.order_controller is not None:
             handlers["2"] = self.order_controller.run_submenu
             handlers["3"] = self.order_controller.run_approval_submenu
+        if self.production_controller is not None:
+            handlers["5"] = self.production_controller.run_submenu
 
         while True:
             self.view.show_menu()

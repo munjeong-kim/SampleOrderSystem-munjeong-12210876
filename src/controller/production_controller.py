@@ -2,6 +2,8 @@ from datetime import datetime
 
 from src.domain.models import OrderStatus
 
+INVALID_INPUT_MESSAGE = "잘못된 입력입니다. 다시 입력해주세요."
+
 
 class ProductionController:
     def __init__(self, view, production_queue_repository, order_repository, sample_repository):
@@ -9,6 +11,10 @@ class ProductionController:
         self.production_queue_repository = production_queue_repository
         self.order_repository = order_repository
         self.sample_repository = sample_repository
+        self._submenu_handlers = {
+            "1": lambda: self.show_status(),
+            "2": lambda: self.show_waiting_queue(),
+        }
 
     def process_queue(self) -> None:
         while True:
@@ -59,3 +65,17 @@ class ProductionController:
             return
 
         self.view.show_production_queue(jobs)
+
+    def run_submenu(self) -> None:
+        while True:
+            self.view.show_production_menu()
+            choice = self.view.get_production_menu_choice()
+
+            if choice == "0":
+                break
+
+            handler = self._submenu_handlers.get(choice)
+            if handler is not None:
+                handler()
+            else:
+                self.view.show_message(INVALID_INPUT_MESSAGE)

@@ -122,3 +122,12 @@ class ConsoleView:
                 f"{number}. {job.order_id} | {job.sample_id} | "
                 f"실생산량: {job.quantity} | {status}"
             )
+
+    def show_production_menu(self) -> None:
+        print("=== 생산 라인 ===")
+        print("1. 생산 현황 조회")
+        print("2. 대기 큐 목록 확인")
+        print("0. 뒤로가기")
+
+    def get_production_menu_choice(self) -> str:
+        return input("메뉴를 선택하세요: ")
