@@ -1,9 +1,8 @@
 import math
 from datetime import date, datetime
 
+from src.controller.menu_dispatch import INVALID_INPUT_MESSAGE, run_menu_loop
 from src.domain.models import Order, OrderStatus, ProductionJob
-
-INVALID_INPUT_MESSAGE = "잘못된 입력입니다. 다시 입력해주세요."
 
 
 class OrderController:
@@ -119,18 +118,12 @@ class OrderController:
         )
 
     def run_submenu(self) -> None:
-        while True:
-            self.view.show_order_menu()
-            choice = self.view.get_order_menu_choice()
-
-            if choice == "0":
-                break
-
-            handler = self._submenu_handlers.get(choice)
-            if handler is not None:
-                handler()
-            else:
-                self.view.show_message(INVALID_INPUT_MESSAGE)
+        run_menu_loop(
+            self.view.show_order_menu,
+            self.view.get_order_menu_choice,
+            self.view.show_message,
+            self._submenu_handlers,
+        )
 
     def run_approval_submenu(self) -> None:
         while True:

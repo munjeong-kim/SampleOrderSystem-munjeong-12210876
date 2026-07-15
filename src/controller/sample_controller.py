@@ -1,9 +1,9 @@
 import math
 
+from src.controller.menu_dispatch import INVALID_INPUT_MESSAGE, run_menu_loop
 from src.domain.models import Sample
 
 PAGE_SIZE = 5
-INVALID_INPUT_MESSAGE = "잘못된 입력입니다. 다시 입력해주세요."
 
 
 class SampleController:
@@ -54,18 +54,12 @@ class SampleController:
         self.view.show_search_results(results)
 
     def run_submenu(self) -> None:
-        while True:
-            self.view.show_sample_menu()
-            choice = self.view.get_sample_menu_choice()
-
-            if choice == "0":
-                break
-
-            handler = self._submenu_handlers.get(choice)
-            if handler is not None:
-                handler()
-            else:
-                self.view.show_message(INVALID_INPUT_MESSAGE)
+        run_menu_loop(
+            self.view.show_sample_menu,
+            self.view.get_sample_menu_choice,
+            self.view.show_message,
+            self._submenu_handlers,
+        )
 
     def _list_samples_with_navigation(self) -> None:
         page = self.view.get_page_number()

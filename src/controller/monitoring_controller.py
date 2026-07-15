@@ -1,7 +1,7 @@
+from src.controller.menu_dispatch import run_menu_loop
 from src.domain.models import OrderStatus
 
 VALID_ORDER_STATUSES = ["RESERVED", "CONFIRMED", "PRODUCING", "RELEASE"]
-INVALID_INPUT_MESSAGE = "잘못된 입력입니다. 다시 입력해주세요."
 
 
 class MonitoringController:
@@ -46,15 +46,9 @@ class MonitoringController:
         self.view.show_stock_status(rows)
 
     def run_submenu(self) -> None:
-        while True:
-            self.view.show_monitoring_menu()
-            choice = self.view.get_monitoring_menu_choice()
-
-            if choice == "0":
-                break
-
-            handler = self._submenu_handlers.get(choice)
-            if handler is not None:
-                handler()
-            else:
-                self.view.show_message(INVALID_INPUT_MESSAGE)
+        run_menu_loop(
+            self.view.show_monitoring_menu,
+            self.view.get_monitoring_menu_choice,
+            self.view.show_message,
+            self._submenu_handlers,
+        )

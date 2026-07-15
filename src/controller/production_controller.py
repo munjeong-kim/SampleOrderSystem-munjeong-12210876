@@ -1,8 +1,7 @@
 from datetime import datetime
 
+from src.controller.menu_dispatch import run_menu_loop
 from src.domain.models import OrderStatus
-
-INVALID_INPUT_MESSAGE = "잘못된 입력입니다. 다시 입력해주세요."
 
 
 class ProductionController:
@@ -67,15 +66,9 @@ class ProductionController:
         self.view.show_production_queue(jobs)
 
     def run_submenu(self) -> None:
-        while True:
-            self.view.show_production_menu()
-            choice = self.view.get_production_menu_choice()
-
-            if choice == "0":
-                break
-
-            handler = self._submenu_handlers.get(choice)
-            if handler is not None:
-                handler()
-            else:
-                self.view.show_message(INVALID_INPUT_MESSAGE)
+        run_menu_loop(
+            self.view.show_production_menu,
+            self.view.get_production_menu_choice,
+            self.view.show_message,
+            self._submenu_handlers,
+        )
