@@ -26,3 +26,17 @@ class SampleRepository:
                 return sample
 
         return None
+
+    def update(self, sample: Sample) -> Sample:
+        samples = self.storage.load()
+
+        for index, item in enumerate(samples):
+            if item["sample_id"] == sample.sample_id:
+                samples[index] = sample.to_dict()
+                break
+        else:
+            raise ValueError(f"존재하지 않는 시료 ID입니다: {sample.sample_id}")
+
+        self.storage.save(samples)
+
+        return sample

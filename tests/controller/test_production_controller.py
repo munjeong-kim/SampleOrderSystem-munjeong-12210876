@@ -52,12 +52,9 @@ def test_완료_시간이_지난_선두_작업은_재고_반영_CONFIRMED_전환
     production_queue_repository.enqueue(
         ProductionJob(order_id="ORD-0002", sample_id="S-002", quantity=10, total_seconds=100.0)
     )
-    mocker.patch(
-        "src.controller.production_controller.datetime"
-    ).now.return_value = datetime(2026, 4, 16, 9, 10, 30)
-    mocker.patch(
-        "src.controller.production_controller.datetime"
-    ).fromisoformat.side_effect = datetime.fromisoformat
+    mock_datetime = mocker.patch("src.controller.production_controller.datetime")
+    mock_datetime.now.return_value = datetime(2026, 4, 16, 9, 10, 30)
+    mock_datetime.fromisoformat.side_effect = datetime.fromisoformat
     controller = ProductionController(
         view, production_queue_repository, order_repository, sample_repository
     )
