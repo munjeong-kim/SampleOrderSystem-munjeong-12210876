@@ -14,7 +14,7 @@
 | 3 | 주문 승인/거절 | ✅ 완료 |
 | 4 | 생산 라인 (FIFO 생산 큐) | ✅ 완료 |
 | 5 | 모니터링 | ✅ 완료 |
-| 6 | 출고 처리 | ☐ 미착수 |
+| 6 | 출고 처리 | 🔧 진행중 |
 | 7 | 메인 메뉴 통합 | ☐ 미착수 |
 | 8 | 마무리 (정합성 점검/회귀 테스트) | ☐ 미착수 |
 
@@ -208,6 +208,21 @@ tests/
 - 특정 주문 선택 후 출고 실행 → 상태 `CONFIRMED` → `RELEASE`
 - `CONFIRMED`가 아닌 주문에 대한 출고 시도 차단
 - `RELEASE`는 최종 상태로 이후 전이 불가 검증
+
+**UX 참고**: Phase 3에서 확립한 "번호와 함께 자동 목록 표시 + 번호 선택" 패턴을 따른다
+(`OrderController.run_approval_submenu()` 참고). 서브메뉴 dispatch 루프는 Phase 5에서
+추출한 `src/controller/menu_dispatch.py`의 `run_menu_loop`/`INVALID_INPUT_MESSAGE`를
+재사용한다.
+
+**세부 진행 항목**
+
+1. 🔧 신규 `ShipmentController(view, order_repository)` — `_get_confirmed_orders()`,
+   `ship(order_id)`: CONFIRMED 상태 주문만 RELEASE로 전환, 그 외 상태는 오류 안내(상태
+   변경 없음)
+2. ☐ `run_submenu()` — 루프마다 CONFIRMED 주문을 번호와 함께 자동 표시 후 "1. 출고 처리"
+   선택 시 번호 입력받아 ship() 호출 (승인/거절 서브메뉴와 동일한 UX 패턴)
+3. ☐ 메인 메뉴(6번)에 출고 처리 서브메뉴 연결 (`MainController`에
+   `shipment_controller=None` 파라미터 추가 + `main.py` 조립)
 
 **참고 문서**: [06-shipment.md](features/06-shipment.md)
 
