@@ -126,9 +126,9 @@ tests/
 
 1. ✅ 접수된 주문 목록 표시 — `OrderController`가 `RESERVED` 상태의 주문만 필터링해 view를
    통해 출력 (pagination 없이 전체 표시), 없으면 안내 메시지
-2. 🔧 주문 승인 처리 — 재고 충분/부족에 따라 `CONFIRMED`/`PRODUCING`으로 분기 (이번 Phase에서는
+2. ✅ 주문 승인 처리 — 재고 충분/부족에 따라 `CONFIRMED`/`PRODUCING`으로 분기 (이번 Phase에서는
    상태 전환만 다루고, FIFO 생산 큐 처리는 Phase 4에서 추가)
-3. ☐ 주문 거절 처리 — `RESERVED` → `REJECTED`
+3. 🔧 주문 거절 처리 — `RESERVED` → `REJECTED`
 4. ☐ 메인 메뉴(3번)에 주문 승인/거절 서브메뉴 연결
 
 **참고 문서**: [03-order-approval.md](features/03-order-approval.md)
