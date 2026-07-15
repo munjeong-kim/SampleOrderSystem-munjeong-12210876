@@ -82,3 +82,28 @@ def test_시료_컨트롤러가_있어도_2부터_6까지는_구현되지_않은
     for call in view.show_message.call_args_list[:5]:
         assert "구현되지 않" in call[0][0]
     assert "종료" in view.show_message.call_args_list[5][0][0]
+
+
+def test_주문_컨트롤러가_주어지면_메뉴_2_입력시_서브메뉴가_호출된다(mocker):
+    view = mocker.MagicMock()
+    view.get_menu_choice.side_effect = ["2", "0"]
+    order_controller = mocker.MagicMock()
+    controller = MainController(view, order_controller=order_controller)
+
+    controller.run()
+
+    order_controller.run_submenu.assert_called_once()
+    view.show_message.assert_called_once()
+    assert "종료" in view.show_message.call_args_list[0][0][0]
+
+
+def test_주문_컨트롤러가_없으면_메뉴_2_입력시_기존_안내가_유지된다(mocker):
+    view = mocker.MagicMock()
+    view.get_menu_choice.side_effect = ["2", "0"]
+    controller = MainController(view)
+
+    controller.run()
+
+    assert view.show_message.call_count == 2
+    assert "구현되지 않" in view.show_message.call_args_list[0][0][0]
+    assert "종료" in view.show_message.call_args_list[1][0][0]

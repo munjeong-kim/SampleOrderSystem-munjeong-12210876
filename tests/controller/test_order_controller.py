@@ -77,3 +77,39 @@ def test_같은_날_여러_건_접수시_주문번호_순번이_증가한다(tmp
 
     orders = order_repository.read_all()
     assert [o.order_id for o in orders] == ["ORD-20260416-0001", "ORD-20260416-0002"]
+
+
+def test_서브메뉴에서_1_선택시_reserve가_호출된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository = _make_repositories(tmp_path)
+    controller = OrderController(view, order_repository, sample_repository)
+    mocker.patch.object(controller, "reserve")
+    view.get_order_menu_choice.side_effect = ["1", "0"]
+
+    controller.run_submenu()
+
+    controller.reserve.assert_called_once()
+
+
+def test_서브메뉴에서_0_선택시_바로_루프가_종료된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository = _make_repositories(tmp_path)
+    controller = OrderController(view, order_repository, sample_repository)
+    mocker.patch.object(controller, "reserve")
+    view.get_order_menu_choice.side_effect = ["0"]
+
+    controller.run_submenu()
+
+    controller.reserve.assert_not_called()
+
+
+def test_서브메뉴에서_잘못된_입력시_안내_메시지_출력_후_계속_진행한다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository = _make_repositories(tmp_path)
+    controller = OrderController(view, order_repository, sample_repository)
+    view.get_order_menu_choice.side_effect = ["abc", "0"]
+
+    controller.run_submenu()
+
+    view.show_message.assert_called_once()
+    assert "잘못된" in view.show_message.call_args[0][0]

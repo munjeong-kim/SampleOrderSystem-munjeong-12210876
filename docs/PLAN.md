@@ -100,11 +100,12 @@ tests/
 
 **세부 진행 항목**
 
-1. 🔧 주문 접수 기능 — `OrderController`(신규)가 view로부터 시료 ID/고객명/주문 수량을
+1. ✅ 주문 접수 기능 — `OrderController`(신규)가 view로부터 시료 ID/고객명/주문 수량을
    입력받아 주문을 생성. 등록되지 않은 시료 ID면 거부(오류 안내), 유효하면
    `ORD-YYYYMMDD-NNNN` 형식으로 주문번호를 채번하고 `OrderRepository.create`로 `RESERVED`
    상태 주문 등록
-2. ☐ 메인 메뉴(2번)에 시료 주문 서브메뉴 연결
+2. 🔧 메인 메뉴(2번)에 시료 주문 서브메뉴 연결 (MainController에서 "2" 입력 시 시료 주문
+   서브메뉴로 진입, 접수/뒤로가기 라우팅 — 이번 Phase 범위는 접수 기능만)
 
 **참고 문서**: [02-order-reservation.md](features/02-order-reservation.md)
 
