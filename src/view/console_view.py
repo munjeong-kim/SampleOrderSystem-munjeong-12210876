@@ -151,3 +151,11 @@ class ConsoleView:
 
     def get_monitoring_menu_choice(self) -> str:
         return input("메뉴를 선택하세요: ")
+
+    def show_shipment_menu(self) -> None:
+        print("=== 출고 처리 ===")
+        print("1. 출고 처리")
+        print("0. 뒤로가기")
+
+    def get_shipment_menu_choice(self) -> str:
+        return input("메뉴를 선택하세요: ")

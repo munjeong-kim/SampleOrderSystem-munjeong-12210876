@@ -1,3 +1,4 @@
+from src.controller.menu_dispatch import INVALID_INPUT_MESSAGE
 from src.domain.models import OrderStatus
 
 
@@ -29,3 +30,35 @@ class ShipmentController:
         self.view.show_message(
             f"주문이 {order.status.name} 상태로 전환되었습니다: {order_id}"
         )
+
+    def run_submenu(self) -> None:
+        while True:
+            orders = self._get_confirmed_orders()
+
+            if not orders:
+                self.view.show_message("출고 가능한 주문이 없습니다.")
+            else:
+                self.view.show_numbered_order_list(orders)
+
+            self.view.show_shipment_menu()
+            choice = self.view.get_shipment_menu_choice()
+
+            if choice == "0":
+                break
+            elif choice == "1":
+                self._select_order_and_ship(orders)
+            else:
+                self.view.show_message(INVALID_INPUT_MESSAGE)
+
+    def _select_order_and_ship(self, orders: list) -> None:
+        if not orders:
+            self.view.show_message("선택할 주문이 없습니다.")
+            return
+
+        number = self.view.get_order_selection_number()
+        if number < 1 or number > len(orders):
+            self.view.show_message("잘못된 번호입니다.")
+            return
+
+        order_id = orders[number - 1].order_id
+        self.ship(order_id)
