@@ -2,6 +2,8 @@ from datetime import date
 
 from src.domain.models import Order
 
+INVALID_INPUT_MESSAGE = "잘못된 입력입니다. 다시 입력해주세요."
+
 
 class OrderController:
     def __init__(self, view, order_repository, sample_repository):
@@ -36,3 +38,15 @@ class OrderController:
         sequence = existing_count + 1
 
         return f"{prefix}{sequence:04d}"
+
+    def run_submenu(self) -> None:
+        while True:
+            self.view.show_order_menu()
+            choice = self.view.get_order_menu_choice()
+
+            if choice == "1":
+                self.reserve()
+            elif choice == "0":
+                break
+            else:
+                self.view.show_message(INVALID_INPUT_MESSAGE)

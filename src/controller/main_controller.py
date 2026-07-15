@@ -2,9 +2,10 @@ IMPLEMENTED_MENU_CHOICES = {"1", "2", "3", "4", "5", "6"}
 
 
 class MainController:
-    def __init__(self, view, sample_controller=None):
+    def __init__(self, view, sample_controller=None, order_controller=None):
         self.view = view
         self.sample_controller = sample_controller
+        self.order_controller = order_controller
 
     def run(self) -> None:
         while True:
@@ -16,6 +17,8 @@ class MainController:
                 break
             elif choice == "1" and self.sample_controller is not None:
                 self.sample_controller.run_submenu()
+            elif choice == "2" and self.order_controller is not None:
+                self.order_controller.run_submenu()
             elif choice in IMPLEMENTED_MENU_CHOICES:
                 self.view.show_message("아직 구현되지 않은 기능입니다.")
             else:

@@ -62,3 +62,22 @@ class ConsoleView:
 
     def get_search_keyword(self) -> str:
         return input("검색어를 입력하세요: ")
+
+    def get_order_reservation_input(self) -> dict:
+        sample_id = input("시료 ID: ")
+        customer_name = input("고객명: ")
+        quantity = int(input("주문 수량: "))
+
+        return {
+            "sample_id": sample_id,
+            "customer_name": customer_name,
+            "quantity": quantity,
+        }
+
+    def show_order_menu(self) -> None:
+        print("=== 시료 주문 ===")
+        print("1. 주문 접수")
+        print("0. 뒤로가기")
+
+    def get_order_menu_choice(self) -> str:
+        return input("메뉴를 선택하세요: ")
