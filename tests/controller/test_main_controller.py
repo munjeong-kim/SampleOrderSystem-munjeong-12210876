@@ -1,4 +1,14 @@
+from datetime import datetime
+
 from src.controller.main_controller import MainController
+from src.controller.order_controller import OrderController
+from src.controller.production_controller import ProductionController
+from src.controller.sample_controller import SampleController
+from src.domain.models import Order, ProductionJob, Sample
+from src.repository.order_repository import OrderRepository
+from src.repository.production_queue_repository import ProductionQueueRepository
+from src.repository.sample_repository import SampleRepository
+from src.storage.json_storage import JsonStorage
 
 
 def test_입력값_0이면_종료_메시지를_출력하고_루프를_종료한다(mocker):
@@ -182,6 +192,68 @@ def test_모니터링_컨트롤러가_없으면_메뉴_4_입력시_기존_안내
     assert view.show_message.call_count == 2
     assert "구현되지 않" in view.show_message.call_args_list[0][0][0]
     assert "종료" in view.show_message.call_args_list[1][0][0]
+
+
+def test_통계가_정확히_계산되어_view에_전달된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository = SampleRepository(JsonStorage(str(tmp_path / "samples.json")))
+    order_repository = OrderRepository(JsonStorage(str(tmp_path / "orders.json")))
+    production_queue_repository = ProductionQueueRepository(
+        JsonStorage(str(tmp_path / "production_queue.json"))
+    )
+    sample_repository.create(
+        Sample(sample_id="S-001", name="실리콘 웨이퍼-8인치", avg_production_time=1.0, yield_rate=0.9, stock_quantity=30)
+    )
+    sample_repository.create(
+        Sample(sample_id="S-002", name="유리 기판", avg_production_time=1.0, yield_rate=0.9, stock_quantity=20)
+    )
+    order_repository.create(Order(order_id="ORD-0001", sample_id="S-001", customer_name="홍길동", quantity=10))
+    order_repository.create(Order(order_id="ORD-0002", sample_id="S-002", customer_name="김철수", quantity=20))
+    order_repository.create(Order(order_id="ORD-0003", sample_id="S-001", customer_name="이영희", quantity=30))
+    production_queue_repository.enqueue(
+        ProductionJob(order_id="ORD-0003", sample_id="S-001", quantity=5, total_seconds=50.0)
+    )
+    sample_controller = SampleController(mocker.MagicMock(), sample_repository)
+    order_controller = OrderController(
+        mocker.MagicMock(), order_repository, sample_repository, production_queue_repository
+    )
+    production_controller = ProductionController(
+        mocker.MagicMock(), production_queue_repository, order_repository, sample_repository
+    )
+    fixed_now = datetime(2026, 4, 16, 9, 0, 0)
+    mocker.patch("src.controller.main_controller.datetime").now.return_value = fixed_now
+    controller = MainController(
+        view,
+        sample_controller=sample_controller,
+        order_controller=order_controller,
+        production_controller=production_controller,
+    )
+    view.get_menu_choice.side_effect = ["0"]
+
+    controller.run()
+
+    view.show_system_stats.assert_called_once()
+    stats = view.show_system_stats.call_args[0][0]
+    assert stats["current_time"] == fixed_now
+    assert stats["sample_count"] == 2
+    assert stats["total_stock"] == 50
+    assert stats["order_count"] == 3
+    assert stats["queue_count"] == 1
+
+
+def test_시료_주문_생산큐가_비어있어도_0으로_정상_표시된다(mocker):
+    view = mocker.MagicMock()
+    controller = MainController(view)
+    view.get_menu_choice.side_effect = ["0"]
+
+    controller.run()
+
+    view.show_system_stats.assert_called_once()
+    stats = view.show_system_stats.call_args[0][0]
+    assert stats["sample_count"] == 0
+    assert stats["total_stock"] == 0
+    assert stats["order_count"] == 0
+    assert stats["queue_count"] == 0
 
 
 def test_출고_컨트롤러가_주어지면_메뉴_6_입력시_서브메뉴가_호출된다(mocker):
