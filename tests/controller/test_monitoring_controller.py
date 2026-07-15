@@ -79,3 +79,117 @@ def test_주문이_없어도_모든_상태가_0으로_집계된다(tmp_path, moc
 
     counts = view.show_order_status_summary.call_args[0][0]
     assert counts == {"RESERVED": 0, "CONFIRMED": 0, "PRODUCING": 0, "RELEASE": 0}
+
+
+def _find_row(rows, sample_id):
+    for sample, required, status in rows:
+        if sample.sample_id == sample_id:
+            return sample, required, status
+    raise AssertionError(f"{sample_id}에 대한 행을 찾을 수 없습니다")
+
+
+def test_재고가_0이면_필요_수량과_무관하게_고갈로_표기된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository = _make_repositories(tmp_path)
+    sample_repository.create(
+        Sample(sample_id="S-001", name="실리콘 웨이퍼-8인치", avg_production_time=1.0, yield_rate=0.9, stock_quantity=0)
+    )
+    order_repository.create(
+        Order(order_id="ORD-0001", sample_id="S-001", customer_name="홍길동", quantity=10, status=OrderStatus.RESERVED)
+    )
+    controller = MonitoringController(view, order_repository, sample_repository)
+
+    controller.show_stock_status()
+
+    rows = view.show_stock_status.call_args[0][0]
+    sample, required, status = _find_row(rows, "S-001")
+    assert required == 10
+    assert status == "고갈"
+
+
+def test_재고가_0보다_크고_필요수량보다_적으면_부족으로_표기된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository = _make_repositories(tmp_path)
+    sample_repository.create(
+        Sample(sample_id="S-001", name="실리콘 웨이퍼-8인치", avg_production_time=1.0, yield_rate=0.9, stock_quantity=5)
+    )
+    order_repository.create(
+        Order(order_id="ORD-0001", sample_id="S-001", customer_name="홍길동", quantity=10, status=OrderStatus.RESERVED)
+    )
+    controller = MonitoringController(view, order_repository, sample_repository)
+
+    controller.show_stock_status()
+
+    rows = view.show_stock_status.call_args[0][0]
+    sample, required, status = _find_row(rows, "S-001")
+    assert required == 10
+    assert status == "부족"
+
+
+def test_재고가_0보다_크고_필요수량_이상이면_여유로_표기된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository = _make_repositories(tmp_path)
+    sample_repository.create(
+        Sample(sample_id="S-001", name="실리콘 웨이퍼-8인치", avg_production_time=1.0, yield_rate=0.9, stock_quantity=10)
+    )
+    order_repository.create(
+        Order(order_id="ORD-0001", sample_id="S-001", customer_name="홍길동", quantity=10, status=OrderStatus.RESERVED)
+    )
+    controller = MonitoringController(view, order_repository, sample_repository)
+
+    controller.show_stock_status()
+
+    rows = view.show_stock_status.call_args[0][0]
+    sample, required, status = _find_row(rows, "S-001")
+    assert required == 10
+    assert status == "여유"
+
+
+def test_RESERVED_주문이_없는_시료는_필요수량_0으로_간주되어_재고가_있으면_여유로_표기된다(
+    tmp_path, mocker
+):
+    view = mocker.MagicMock()
+    sample_repository, order_repository = _make_repositories(tmp_path)
+    sample_repository.create(
+        Sample(sample_id="S-001", name="실리콘 웨이퍼-8인치", avg_production_time=1.0, yield_rate=0.9, stock_quantity=10)
+    )
+    controller = MonitoringController(view, order_repository, sample_repository)
+
+    controller.show_stock_status()
+
+    rows = view.show_stock_status.call_args[0][0]
+    sample, required, status = _find_row(rows, "S-001")
+    assert required == 0
+    assert status == "여유"
+
+
+def test_필요_수량은_해당_시료의_RESERVED_주문_수량만_합산한다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository = _make_repositories(tmp_path)
+    sample_repository.create(
+        Sample(sample_id="S-001", name="실리콘 웨이퍼-8인치", avg_production_time=1.0, yield_rate=0.9, stock_quantity=5)
+    )
+    sample_repository.create(
+        Sample(sample_id="S-002", name="유리 기판", avg_production_time=1.0, yield_rate=0.9, stock_quantity=5)
+    )
+    order_repository.create(
+        Order(order_id="ORD-0001", sample_id="S-001", customer_name="홍길동", quantity=10, status=OrderStatus.RESERVED)
+    )
+    order_repository.create(
+        Order(order_id="ORD-0002", sample_id="S-001", customer_name="김철수", quantity=20, status=OrderStatus.RESERVED)
+    )
+    order_repository.create(
+        Order(order_id="ORD-0003", sample_id="S-001", customer_name="이영희", quantity=100, status=OrderStatus.CONFIRMED)
+    )
+    order_repository.create(
+        Order(order_id="ORD-0004", sample_id="S-002", customer_name="박영수", quantity=5, status=OrderStatus.RESERVED)
+    )
+    controller = MonitoringController(view, order_repository, sample_repository)
+
+    controller.show_stock_status()
+
+    rows = view.show_stock_status.call_args[0][0]
+    _, required_s001, _ = _find_row(rows, "S-001")
+    _, required_s002, _ = _find_row(rows, "S-002")
+    assert required_s001 == 30
+    assert required_s002 == 5
