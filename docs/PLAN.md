@@ -8,7 +8,7 @@
 
 | Phase | 내용 | 상태 |
 |---|---|---|
-| 0 | 프로젝트 기반 구조 설정 | 🔧 진행중 |
+| 0 | 프로젝트 기반 구조 설정 | ✅ 완료 |
 | 1 | 시료 관리 (등록/조회/검색) | ☐ 미착수 |
 | 2 | 시료 주문 접수 (예약) | ☐ 미착수 |
 | 3 | 주문 승인/거절 | ☐ 미착수 |
@@ -56,7 +56,7 @@ tests/
    파일 락은 단일 프로세스 콘솔 앱이라 미채택)
 3. ✅ `src/repository` SampleRepository, OrderRepository 구현 (dict 기반 CRUD, 모델의
    to_dict/from_dict 변환 활용)
-4. 🔧 콘솔 앱 진입점(`main.py`) 및 최소한의 메뉴 루프 스켈레톤 (`ConsoleView` + `MainController`,
+4. ✅ 콘솔 앱 진입점(`main.py`) 및 최소한의 메뉴 루프 스켈레톤 (`ConsoleView` + `MainController`,
    메뉴 0~6 표시, 0 입력 시 종료, 1~6은 "아직 구현되지 않은 기능" 안내, 하위 메뉴는 이후
    Phase에서 채움)
 
