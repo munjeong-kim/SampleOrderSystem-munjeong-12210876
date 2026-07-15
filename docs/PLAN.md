@@ -221,7 +221,7 @@ tests/
    변경 없음)
 2. ✅ `run_submenu()` — 루프마다 CONFIRMED 주문을 번호와 함께 자동 표시 후 "1. 출고 처리"
    선택 시 번호 입력받아 ship() 호출 (승인/거절 서브메뉴와 동일한 UX 패턴)
-3. 🔧 메인 메뉴(6번)에 출고 처리 서브메뉴 연결 (`MainController`에
+3. ✅ 메인 메뉴(6번)에 출고 처리 서브메뉴 연결 (`MainController`에
    `shipment_controller=None` 파라미터 추가 + `main.py` 조립)
 
 **참고 문서**: [06-shipment.md](features/06-shipment.md)

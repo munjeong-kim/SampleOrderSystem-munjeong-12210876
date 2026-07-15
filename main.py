@@ -5,6 +5,7 @@ from src.controller.monitoring_controller import MonitoringController
 from src.controller.order_controller import OrderController
 from src.controller.production_controller import ProductionController
 from src.controller.sample_controller import SampleController
+from src.controller.shipment_controller import ShipmentController
 from src.repository.order_repository import OrderRepository
 from src.repository.production_queue_repository import ProductionQueueRepository
 from src.repository.sample_repository import SampleRepository
@@ -29,6 +30,7 @@ if __name__ == "__main__":
         view, production_queue_repository, order_repository, sample_repository
     )
     monitoring_controller = MonitoringController(view, order_repository, sample_repository)
+    shipment_controller = ShipmentController(view, order_repository)
 
     MainController(
         view,
@@ -36,4 +38,5 @@ if __name__ == "__main__":
         order_controller=order_controller,
         production_controller=production_controller,
         monitoring_controller=monitoring_controller,
+        shipment_controller=shipment_controller,
     ).run()

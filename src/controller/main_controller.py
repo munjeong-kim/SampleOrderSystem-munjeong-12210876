@@ -9,12 +9,14 @@ class MainController:
         order_controller=None,
         production_controller=None,
         monitoring_controller=None,
+        shipment_controller=None,
     ):
         self.view = view
         self.sample_controller = sample_controller
         self.order_controller = order_controller
         self.production_controller = production_controller
         self.monitoring_controller = monitoring_controller
+        self.shipment_controller = shipment_controller
 
     def run(self) -> None:
         handlers = {}
@@ -27,6 +29,8 @@ class MainController:
             handlers["4"] = self.monitoring_controller.run_submenu
         if self.production_controller is not None:
             handlers["5"] = self.production_controller.run_submenu
+        if self.shipment_controller is not None:
+            handlers["6"] = self.shipment_controller.run_submenu
 
         while True:
             self.view.show_menu()
