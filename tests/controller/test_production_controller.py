@@ -298,3 +298,62 @@ def test_대기_큐_목록이_FIFO_순서로_표시된다(tmp_path, mocker):
     view.show_production_queue.assert_called_once()
     jobs = view.show_production_queue.call_args[0][0]
     assert [job.order_id for job in jobs] == ["ORD-0001", "ORD-0002"]
+
+
+def test_서브메뉴에서_1_선택시_show_status가_호출된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository, production_queue_repository = _make_repositories(tmp_path)
+    controller = ProductionController(
+        view, production_queue_repository, order_repository, sample_repository
+    )
+    mocker.patch.object(controller, "show_status")
+    view.get_production_menu_choice.side_effect = ["1", "0"]
+
+    controller.run_submenu()
+
+    controller.show_status.assert_called_once()
+
+
+def test_서브메뉴에서_2_선택시_show_waiting_queue가_호출된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository, production_queue_repository = _make_repositories(tmp_path)
+    controller = ProductionController(
+        view, production_queue_repository, order_repository, sample_repository
+    )
+    mocker.patch.object(controller, "show_waiting_queue")
+    view.get_production_menu_choice.side_effect = ["2", "0"]
+
+    controller.run_submenu()
+
+    controller.show_waiting_queue.assert_called_once()
+
+
+def test_서브메뉴에서_0_선택시_바로_루프가_종료된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository, production_queue_repository = _make_repositories(tmp_path)
+    controller = ProductionController(
+        view, production_queue_repository, order_repository, sample_repository
+    )
+    mocker.patch.object(controller, "show_status")
+    mocker.patch.object(controller, "show_waiting_queue")
+    view.get_production_menu_choice.side_effect = ["0"]
+
+    controller.run_submenu()
+
+    controller.show_status.assert_not_called()
+    controller.show_waiting_queue.assert_not_called()
+
+
+def test_서브메뉴에서_잘못된_입력시_안내_메시지_출력_후_계속_진행한다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository, production_queue_repository = _make_repositories(tmp_path)
+    controller = ProductionController(
+        view, production_queue_repository, order_repository, sample_repository
+    )
+    view.get_production_menu_choice.side_effect = ["xyz", "0"]
+
+    controller.run_submenu()
+
+    assert any(
+        "잘못된 입력입니다" in call.args[0] for call in view.show_message.call_args_list
+    )
