@@ -82,19 +82,28 @@ class OrderController:
             return
 
         sample = self.sample_repository.read_one(order.sample_id)
-        if order.quantity <= sample.stock_quantity:
+        available = self._get_available_stock(sample)
+        if order.quantity <= available:
             order.status = OrderStatus.CONFIRMED
         else:
             order.status = OrderStatus.PRODUCING
-            self._enqueue_production_job(order, sample)
+            self._enqueue_production_job(order, sample, available)
 
         self.order_repository.update(order)
         self.view.show_message(
             f"주문이 승인되어 {order.status.name} 상태로 전환되었습니다: {order_id}"
         )
 
-    def _enqueue_production_job(self, order: Order, sample) -> None:
-        shortage = order.quantity - sample.stock_quantity
+    def _get_available_stock(self, sample) -> int:
+        committed = sum(
+            o.quantity
+            for o in self.order_repository.read_all()
+            if o.sample_id == sample.sample_id and o.status == OrderStatus.CONFIRMED
+        )
+        return sample.stock_quantity - committed
+
+    def _enqueue_production_job(self, order: Order, sample, available: int) -> None:
+        shortage = order.quantity - available
         actual_quantity = math.ceil(shortage / sample.yield_rate)
         total_seconds = sample.avg_production_time * actual_quantity
 
