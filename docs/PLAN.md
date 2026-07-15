@@ -13,7 +13,7 @@
 | 2 | 시료 주문 접수 (예약) | ✅ 완료 |
 | 3 | 주문 승인/거절 | ✅ 완료 |
 | 4 | 생산 라인 (FIFO 생산 큐) | ✅ 완료 |
-| 5 | 모니터링 | ☐ 미착수 |
+| 5 | 모니터링 | 🔧 진행중 |
 | 6 | 출고 처리 | ☐ 미착수 |
 | 7 | 메인 메뉴 통합 | ☐ 미착수 |
 | 8 | 마무리 (정합성 점검/회귀 테스트) | ☐ 미착수 |
@@ -183,6 +183,18 @@ tests/
 - 시료별 필요 수량 산출: 해당 시료의 `RESERVED` 주문 수량 합
 - 재고 상태 판정: 고갈(재고==0) / 부족(0<재고<필요수량) / 여유(재고>0 and 재고>=필요수량)
 - `RESERVED` 주문이 없는 시료는 필요 수량 0으로 간주
+
+**세부 진행 항목**
+
+1. 🔧 신규 `MonitoringController(view, order_repository, sample_repository)` +
+   `show_order_status_summary()` — REJECTED 제외 상태별(RESERVED/CONFIRMED/PRODUCING/RELEASE)
+   주문 건수 집계, 0건인 상태도 결과에 포함
+2. ☐ `show_stock_status()` — 시료별 RESERVED 주문 수량 합(필요 수량) 산출 후 고갈/부족/여유
+   판정하여 view에 전달
+3. ☐ `run_submenu()` — 기존 Controller들과 동일한 dispatch 패턴("1.주문량 확인/2.재고량
+   확인/0.뒤로가기")
+4. ☐ 메인 메뉴(4번)에 모니터링 서브메뉴 연결 (`MainController`에 `monitoring_controller=None`
+   파라미터 추가 + `main.py` 조립)
 
 **참고 문서**: [04-monitoring.md](features/04-monitoring.md)
 
