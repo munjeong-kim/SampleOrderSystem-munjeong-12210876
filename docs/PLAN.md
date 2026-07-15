@@ -8,7 +8,7 @@
 
 | Phase | 내용 | 상태 |
 |---|---|---|
-| 0 | 프로젝트 기반 구조 설정 | ☐ 미착수 |
+| 0 | 프로젝트 기반 구조 설정 | 🔧 진행중 |
 | 1 | 시료 관리 (등록/조회/검색) | ☐ 미착수 |
 | 2 | 시료 주문 접수 (예약) | ☐ 미착수 |
 | 3 | 주문 승인/거절 | ☐ 미착수 |
@@ -26,13 +26,25 @@
 
 **목표**: 이후 모든 기능이 의존하는 도메인 모델·영속성·CLI 뼈대를 준비한다.
 
-- PRD 7장 참고 PoC 검토: MVC 스켈레톤, 데이터 영속성 처리, 데이터 모니터링 Tool, Dummy 데이터
-  생성 Tool 저장소를 확인하여 채택 가능한 구조/방식을 파악한다 (그대로 채택할 필요는 없음).
-- 디렉토리 구조 설계 (예: `src/domain`, `src/repository`, `src/service`, `src/cli`, `tests/`)
-- 도메인 모델 정의: `Sample`(시료), `Order`(주문) 등 핵심 엔티티와 상태(Enum) 정의
-- 데이터 영속성 방식 결정 및 기본 저장/조회 구현 (PRD 7장의 DataPersistence PoC 참고)
-- 콘솔 앱 진입점(`main.py`) 및 최소한의 메뉴 루프 스켈레톤 (하위 메뉴는 이후 Phase에서 채움)
-- pytest 실행 환경 확인 (pytest, pytest-mock 설치 및 샘플 테스트 통과 확인)
+디렉토리 구조는 아래로 확정 (PoC 저장소 ConsoleMVC, DataPersistence 참고):
+```
+src/
+  domain/        # Sample, Order, OrderStatus(Enum) 등 도메인 모델
+  storage/       # JsonStorage (JSON 파일 저장, tmp+replace 원자적 쓰기)
+  repository/    # SampleRepository, OrderRepository
+  controller/    # 메뉴별 컨트롤러
+  view/          # 콘솔 입출력
+main.py
+tests/
+```
+
+**세부 진행 항목**
+
+1. 🔧 `src/domain` 도메인 모델 정의: `Sample`, `OrderStatus`(Enum), `Order` (순수 데이터
+   클래스, 비즈니스 로직 없음)
+2. ☐ `src/storage` JsonStorage 구현 (JSON 파일 저장, tmp+replace 원자적 쓰기)
+3. ☐ `src/repository` SampleRepository, OrderRepository 구현
+4. ☐ 콘솔 앱 진입점(`main.py`) 및 최소한의 메뉴 루프 스켈레톤 (하위 메뉴는 이후 Phase에서 채움)
 
 **참고 문서**: [00-overview.md](features/00-overview.md)
 
