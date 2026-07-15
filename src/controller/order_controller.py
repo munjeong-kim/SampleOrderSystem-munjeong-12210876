@@ -13,11 +13,6 @@ class OrderController:
         self._submenu_handlers = {
             "1": lambda: self.reserve(),
         }
-        self._approval_submenu_handlers = {
-            "1": lambda: self.list_pending_orders(),
-            "2": lambda: self.approve(self.view.get_order_id_input()),
-            "3": lambda: self.reject(self.view.get_order_id_input()),
-        }
 
     def reserve(self) -> None:
         input_data = self.view.get_order_reservation_input()
@@ -47,12 +42,15 @@ class OrderController:
 
         return f"{prefix}{sequence:04d}"
 
-    def list_pending_orders(self) -> None:
-        orders = [
+    def _get_pending_orders(self) -> list:
+        return [
             order
             for order in self.order_repository.read_all()
             if order.status == OrderStatus.RESERVED
         ]
+
+    def list_pending_orders(self) -> None:
+        orders = self._get_pending_orders()
 
         if not orders:
             self.view.show_message("접수된 주문이 없습니다.")
@@ -116,14 +114,35 @@ class OrderController:
 
     def run_approval_submenu(self) -> None:
         while True:
+            orders = self._get_pending_orders()
+
+            if not orders:
+                self.view.show_message("접수된 주문이 없습니다.")
+            else:
+                self.view.show_numbered_order_list(orders)
+
             self.view.show_order_approval_menu()
             choice = self.view.get_order_approval_menu_choice()
 
             if choice == "0":
                 break
-
-            handler = self._approval_submenu_handlers.get(choice)
-            if handler is not None:
-                handler()
+            elif choice in ("1", "2"):
+                self._select_order_and_process(orders, choice)
             else:
                 self.view.show_message(INVALID_INPUT_MESSAGE)
+
+    def _select_order_and_process(self, orders: list, choice: str) -> None:
+        if not orders:
+            self.view.show_message("선택할 주문이 없습니다.")
+            return
+
+        number = self.view.get_order_selection_number()
+        if number < 1 or number > len(orders):
+            self.view.show_message("잘못된 번호입니다.")
+            return
+
+        order_id = orders[number - 1].order_id
+        if choice == "1":
+            self.approve(order_id)
+        else:
+            self.reject(order_id)

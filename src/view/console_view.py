@@ -91,13 +91,19 @@ class ConsoleView:
 
     def show_order_approval_menu(self) -> None:
         print("=== 주문 승인/거절 ===")
-        print("1. 접수된 주문 목록 조회")
-        print("2. 주문 승인")
-        print("3. 주문 거절")
+        print("1. 승인")
+        print("2. 거절")
         print("0. 뒤로가기")
 
     def get_order_approval_menu_choice(self) -> str:
         return input("메뉴를 선택하세요: ")
 
-    def get_order_id_input(self) -> str:
-        return input("주문번호를 입력하세요: ")
+    def show_numbered_order_list(self, orders: list) -> None:
+        for number, order in enumerate(orders, start=1):
+            print(
+                f"{number}. {order.order_id} | {order.customer_name} | "
+                f"{order.sample_id} | 수량: {order.quantity}"
+            )
+
+    def get_order_selection_number(self) -> int:
+        return int(input("번호를 선택하세요: "))
