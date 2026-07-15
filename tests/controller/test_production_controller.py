@@ -191,3 +191,110 @@ def test_빈_큐에서는_아무_일도_안_일어난다(tmp_path, mocker):
     controller.process_queue()
 
     assert production_queue_repository.read_all() == []
+
+
+def test_생산_현황_조회_시_process_queue가_먼저_실행된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository, production_queue_repository = _make_repositories(tmp_path)
+    controller = ProductionController(
+        view, production_queue_repository, order_repository, sample_repository
+    )
+    mocker.patch.object(controller, "process_queue")
+
+    controller.show_status()
+
+    controller.process_queue.assert_called_once()
+
+
+def test_현재_생산_중인_작업이_없으면_안내_메시지가_출력된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository, production_queue_repository = _make_repositories(tmp_path)
+    controller = ProductionController(
+        view, production_queue_repository, order_repository, sample_repository
+    )
+    mocker.patch.object(controller, "process_queue")
+
+    controller.show_status()
+
+    view.show_current_production.assert_not_called()
+    view.show_message.assert_called_once()
+    assert "현재 생산 중인 작업이 없습니다" in view.show_message.call_args[0][0]
+
+
+def test_현재_생산_중인_작업이_있으면_view로_표시된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository, production_queue_repository = _make_repositories(tmp_path)
+    job = ProductionJob(
+        order_id="ORD-0001",
+        sample_id="S-001",
+        quantity=63,
+        total_seconds=630.0,
+        started_at="2026-04-16T09:00:00",
+    )
+    production_queue_repository.enqueue(job)
+    controller = ProductionController(
+        view, production_queue_repository, order_repository, sample_repository
+    )
+    mocker.patch.object(controller, "process_queue")
+
+    controller.show_status()
+
+    view.show_message.assert_not_called()
+    view.show_current_production.assert_called_once()
+    shown_job = view.show_current_production.call_args[0][0]
+    assert shown_job.order_id == "ORD-0001"
+
+
+def test_대기_큐_목록_조회_시_process_queue가_먼저_실행된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository, production_queue_repository = _make_repositories(tmp_path)
+    controller = ProductionController(
+        view, production_queue_repository, order_repository, sample_repository
+    )
+    mocker.patch.object(controller, "process_queue")
+
+    controller.show_waiting_queue()
+
+    controller.process_queue.assert_called_once()
+
+
+def test_대기_큐가_비어있으면_안내_메시지가_출력된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository, production_queue_repository = _make_repositories(tmp_path)
+    controller = ProductionController(
+        view, production_queue_repository, order_repository, sample_repository
+    )
+    mocker.patch.object(controller, "process_queue")
+
+    controller.show_waiting_queue()
+
+    view.show_production_queue.assert_not_called()
+    view.show_message.assert_called_once()
+    assert "대기 중인 생산 작업이 없습니다" in view.show_message.call_args[0][0]
+
+
+def test_대기_큐_목록이_FIFO_순서로_표시된다(tmp_path, mocker):
+    view = mocker.MagicMock()
+    sample_repository, order_repository, production_queue_repository = _make_repositories(tmp_path)
+    production_queue_repository.enqueue(
+        ProductionJob(
+            order_id="ORD-0001",
+            sample_id="S-001",
+            quantity=63,
+            total_seconds=630.0,
+            started_at="2026-04-16T09:00:00",
+        )
+    )
+    production_queue_repository.enqueue(
+        ProductionJob(order_id="ORD-0002", sample_id="S-002", quantity=10, total_seconds=100.0)
+    )
+    controller = ProductionController(
+        view, production_queue_repository, order_repository, sample_repository
+    )
+    mocker.patch.object(controller, "process_queue")
+
+    controller.show_waiting_queue()
+
+    view.show_production_queue.assert_called_once()
+    jobs = view.show_production_queue.call_args[0][0]
+    assert [job.order_id for job in jobs] == ["ORD-0001", "ORD-0002"]
