@@ -281,6 +281,22 @@ tests/
   전부 `return input("메뉴를 선택하세요: ")`로 동일한 것도 검토했으나, 서로 다른 화면의 입력을
   의미상 구분해주는 이름이라 통합하지 않기로 함.
 
+**버그 수정 이력**
+
+- **이중 할당(double booking) 버그**: 주문 승인(`OrderController.approve()`) 시점에는
+  재고를 차감하지 않고 항상 "현재" `stock_quantity`와 주문 수량을 비교했기 때문에, 같은
+  시료에 대해 순차로 승인되는 여러 주문이 재고를 중복으로 확보(둘 다 "재고 충분"으로
+  오판정되어 CONFIRMED)할 수 있는 버그가 있었다.
+  - **수정 규칙**: 주문이 `CONFIRMED` 상태로 전환되는 시점에 항상 `order.quantity`만큼
+    재고를 차감한다. 즉시 승인(재고 충분)되는 경우와 생산 완료 후 `PRODUCING`→`CONFIRMED`로
+    전환되는 경우 모두 동일하게 적용한다.
+  - **수정 위치**: `OrderController.approve()`의 즉시 CONFIRMED 분기(`sample.stock_quantity
+    -= order.quantity`), `ProductionController._complete_job()`(생산된 실생산량을 더하고
+    주문 수량만큼 뺀 순증감을 반영: `sample.stock_quantity += job.quantity - order.quantity`).
+  - **검증**: 재고 100인 시료에 대해 50짜리 주문(CONFIRMED, 재고 100→50) 승인 후 80짜리
+    주문을 승인하면 남은 재고(50) < 80이므로 이제는 정확히 `PRODUCING`으로 분기됨을 통합
+    테스트로 확인(`tests/controller/test_order_controller.py`).
+
 ---
 
 ## 진행 방식 메모
